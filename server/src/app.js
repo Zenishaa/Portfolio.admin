@@ -33,6 +33,7 @@ import publicRoutes from "./routes/public.routes.js";
 import apiRoutes from "./routes/api.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
+import logsRoutes from "./routes/logs.routes.js";
 
 
 dotenv.config();
@@ -88,6 +89,7 @@ app.use("/api/keys", apiRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/token", tokenRoutes);
+app.use("/api/logs", logsRoutes);
 
 const PORT = process.env.PORT || 8000;
 
