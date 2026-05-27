@@ -1,11 +1,12 @@
 import {
+  Award,
+  BarChart3,
   BriefcaseBusiness,
+  FileText,
   FolderKanban,
   LayoutDashboard,
   LogOut,
-  Code,
-  User,
-  Award,
+  Settings,
 } from "lucide-react";
 
 import {
@@ -193,6 +194,14 @@ function Sidebar({
                 location.pathname ===
                 "/profile"
               }
+              sidebarOpen={sidebarOpen}
+            />
+
+            <SidebarItem
+              icon={<Award size={20} />}
+              label="Achievements"
+              path="/achievements"
+              active={location.pathname.startsWith("/achievements")}
               sidebarOpen={sidebarOpen}
             />
 

@@ -4,109 +4,28 @@ import {
   Route,
 } from "react-router-dom";
 
-import Landing from "@features/landing/pages/Landing";
-
-import Login from "@features/auth/pages/Login";
-
-import AuthCallback from "@features/auth/pages/AuthCallback";
-
-import Dashboard from "@features/dashboard/pages/Dashboard";
-
-import Profile from "@features/profile/pages/Profile";
-
-import Projects from "@features/projects/pages/Projects";
-
-import CreateProject from "@features/projects/pages/CreateProject";
-
-import EditProject from "@features/projects/pages/EditProject";
-
-import ProtectedRoute from "@app/routes/ProtectedRoute";
-
-import NotFound from "@app/pages/NotFound";
+import Landing from "../../pages/Landing";
+import Login from "../../pages/Login";
+import Register from "../../pages/Register";
+import Dashboard from "../../pages/Dashboard";
+import Projects from "../../pages/Projects";
+import CreateProject from "../../pages/CreateProject";
+import Achievements from "../../pages/Achievements";
+import CreateAchievement from "../../pages/CreateAchievement";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
-
       <Routes>
-
-        {/* =========================
-            PUBLIC ROUTES
-        ========================= */}
-
-        <Route
-          path="/"
-          element={<Landing />}
-        />
-
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
-        <Route
-          path="/auth/github/callback"
-          element={
-            <AuthCallback />
-          }
-        />
-
-        {/* =========================
-            PROTECTED ROUTES
-        ========================= */}
-
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/projects"
-          element={
-            <ProtectedRoute>
-              <Projects />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/projects/create"
-          element={
-            <ProtectedRoute>
-              <CreateProject />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/projects/:slug/edit"
-          element={
-            <ProtectedRoute>
-              <EditProject />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="*"
-          element={<NotFound />}
-        />
-
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/create" element={<CreateProject />} />
+        <Route path="/achievements" element={<Achievements />} />
+        <Route path="/achievements/create" element={<CreateAchievement />} />
       </Routes>
-
     </BrowserRouter>
   );
 }
