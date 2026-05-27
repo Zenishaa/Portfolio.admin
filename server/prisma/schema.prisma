@@ -15,7 +15,7 @@ model User {
 
   username String? @unique @db.VarChar(100)
 
-  email String @db.VarChar(255)
+  email String @unique @db.VarChar(255)
 
   github_id String? @unique @db.VarChar(100)
 
