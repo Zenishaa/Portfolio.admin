@@ -1,25 +1,37 @@
-import { useEffect } from "react";
+import { useEffect }
+from "react";
 
-import { useNavigate } from "react-router-dom";
+import {
+  useNavigate,
+} from "react-router-dom";
 
-import PageLoader from "../components/ui/PageLoader";
+import PageLoader
+from "../components/ui/PageLoader";
 
 function AuthCallback() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
   useEffect(() => {
+
     const params =
       new URLSearchParams(
         window.location.search
       );
 
     const accessToken =
-      params.get("accessToken");
+      params.get(
+        "accessToken"
+      );
 
     const refreshToken =
-      params.get("refreshToken");
+      params.get(
+        "refreshToken"
+      );
 
-    const user = params.get("user");
+    /* =====================
+        VALIDATION
+    ===================== */
 
     if (
       !accessToken ||
@@ -35,6 +47,10 @@ function AuthCallback() {
       return;
     }
 
+    /* =====================
+        STORE TOKENS
+    ===================== */
+
     localStorage.setItem(
       "accessToken",
       accessToken
@@ -45,16 +61,27 @@ function AuthCallback() {
       refreshToken
     );
 
-    if (user) {
-      localStorage.setItem(
-        "user",
-        user
-      );
-    }
+    /* =====================
+        CLEAN URL
+    ===================== */
 
-    navigate("/dashboard", {
-      replace: true,
-    });
+    window.history.replaceState(
+      {},
+      document.title,
+      "/dashboard"
+    );
+
+    /* =====================
+        REDIRECT
+    ===================== */
+
+    navigate(
+      "/dashboard",
+      {
+        replace: true,
+      }
+    );
+
   }, [navigate]);
 
   return <PageLoader />;
