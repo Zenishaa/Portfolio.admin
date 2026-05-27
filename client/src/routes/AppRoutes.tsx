@@ -5,11 +5,18 @@ import {
 } from "react-router-dom";
 
 import Landing from "../pages/Landing";
+
 import Login from "../pages/Login";
+
 import AuthCallback from "../pages/AuthCallback";
+
 import Dashboard from "../pages/Dashboard";
+
 import Projects from "../pages/Projects";
+
 import CreateProject from "../pages/CreateProject";
+
+import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
   return (
@@ -17,14 +24,14 @@ function AppRoutes() {
 
       <Routes>
 
-        {/* Landing Page */}
+        {/* =========================
+            PUBLIC ROUTES
+        ========================= */}
 
         <Route
           path="/"
           element={<Landing />}
         />
-
-        {/* Login */}
 
         <Route
           path="/login"
@@ -33,28 +40,40 @@ function AppRoutes() {
 
         <Route
           path="/auth/github/callback"
-          element={<AuthCallback />}
+          element={
+            <AuthCallback />
+          }
         />
 
-        {/* Dashboard */}
+        {/* =========================
+            PROTECTED ROUTES
+        ========================= */}
 
         <Route
           path="/dashboard"
-          element={<Dashboard />}
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
         />
 
         <Route
-            path="/projects"
-            element={
-                <Projects />
-            }
+          path="/projects"
+          element={
+            <ProtectedRoute>
+              <Projects />
+            </ProtectedRoute>
+          }
         />
 
         <Route
-            path="/projects/create"
-            element={
-                <CreateProject />
-            }
+          path="/projects/create"
+          element={
+            <ProtectedRoute>
+              <CreateProject />
+            </ProtectedRoute>
+          }
         />
 
       </Routes>
