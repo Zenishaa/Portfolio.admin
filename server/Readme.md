@@ -515,8 +515,8 @@ POST /api/token/refresh
 ```bash
 GET /api/projects
 POST /api/projects
-PUT /api/projects/:id
-DELETE /api/projects/:id
+PUT /api/projects/:skug
+DELETE /api/projects/:slug
 ```
 
 ---
@@ -526,6 +526,8 @@ DELETE /api/projects/:id
 ```bash
 GET /api/certificates
 POST /api/certificates
+PUT /api/certificates/:skug
+DELETE /api/certificates/:slug
 ```
 
 ---
@@ -549,8 +551,10 @@ GET /api/analytics
 ## Public APIs
 
 ```bash
-GET /api/public/:username
+GET /api/public/
+Add header x-api-key apikey
 ```
+
 
 ---
 
