@@ -1,295 +1,380 @@
-import bcrypt from "bcryptjs";
+import cloudinary from "../config/cloudinary.js";
 
-import { prisma }
-from "../config/db.js";
+import { prisma } from "../config/db.js";
 
 import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/generateTokens.js";
 
-import {
-  getISTTime,
-} from "../utils/time.js";
+import { getISTTime } from "../utils/time.js";
 
-export const registerUser =
-  async (req, res) => {
-    try {
+const githubAuthorizeUrl =
+  "https://github.com/login/oauth/authorize";
 
-      const {
-        name,
-        username,
-        institute_email,
-        password,
-        recovery_email,
-      } = req.body;
+const githubTokenUrl =
+  "https://github.com/login/oauth/access_token";
 
-      if (
-        !name ||
-        !username ||
-        !institute_email ||
-        !password
-      ) {
+const githubApiUrl =
+  "https://api.github.com";
 
-        return res.status(400).json({
-          success: false,
-          message:
-            "Please fill all required fields",
-        });
-      }
+const getServerUrl = () =>
+  process.env.SERVER_URL ||
+  `http://localhost:${process.env.PORT || 8000}`;
 
-      const existingUser =
-        await prisma.user.findFirst({
-          where: {
+const getClientUrl = () =>
+  process.env.CLIENT_URL ||
+  "http://localhost:5173";
 
-            OR: [
-              {
-                institute_email,
-              },
+const getGithubRedirectUri = () =>
+  process.env.GITHUB_CALLBACK_URL ||
+  `${getServerUrl()}/api/auth/github/callback`;
 
-              {
-                username,
-              },
-            ],
-          },
-        });
+const createRefreshToken = async (userId) => {
+  const refreshToken =
+    generateRefreshToken(userId);
 
-      if (existingUser) {
+  await prisma.refreshToken.create({
+    data: {
+      user_id: userId,
+      token: refreshToken,
+      expires_at: new Date(
+        Date.now() +
+          7 *
+            24 *
+            60 *
+            60 *
+            1000
+      ),
+    },
+  });
 
-        if (
-          existingUser.institute_email ===
-          institute_email
-        ) {
+  return refreshToken;
+};
 
-          return res.status(400).json({
-            success: false,
-            message:
-              "Institute email already exists",
-          });
-        }
-
-        if (
-          existingUser.username ===
-          username
-        ) {
-
-          return res.status(400).json({
-            success: false,
-            message:
-              "Username already taken",
-          });
-        }
-      }
-
-      const hashedPassword =
-        await bcrypt.hash(
-          password,
-          10
-        );
-
-      const user =
-        await prisma.user.create({
-          data: {
-            name,
-            username,
-            institute_email,
-            recovery_email,
-            password:
-              hashedPassword,
-          },
-
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            institute_email: true,
-            recovery_email: true,
-            created_at: true,
-          },
-        });
-
-      const accessToken =
-        generateAccessToken(
-          user.id
-        );
-
-      const refreshToken =
-        generateRefreshToken(
-          user.id
-        );
-
-      await prisma.refreshToken.create({
-        data: {
-
-          user_id:
-            user.id,
-
-          token:
-            refreshToken,
-
-          expires_at:
-            new Date(
-              Date.now() +
-              7 *
-                24 *
-                60 *
-                60 *
-                1000
-            ),
-        },
-      });
-
-      return res.status(201).json({
-        success: true,
-        message:
-          "User registered successfully",
-
-        accessToken,
-
-        refreshToken,
-
-        user,
-      });
-
-    } catch (error) {
-
-      console.log(error);
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Server Error",
-      });
+const getGithubAccessToken = async (code) => {
+  const response = await fetch(
+    githubTokenUrl,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        client_id:
+          process.env.GITHUB_CLIENT_ID,
+        client_secret:
+          process.env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri:
+          getGithubRedirectUri(),
+      }),
     }
+  );
+
+  const data = await response.json();
+
+  if (
+    !response.ok ||
+    !data.access_token
+  ) {
+    throw new Error(
+      data.error_description ||
+        "GitHub token exchange failed"
+    );
+  }
+
+  return data.access_token;
+};
+
+const githubRequest = async (
+  path,
+  accessToken
+) => {
+  const response = await fetch(
+    `${githubApiUrl}${path}`,
+    {
+      headers: {
+        Accept:
+          "application/vnd.github+json",
+        Authorization:
+          `Bearer ${accessToken}`,
+        "X-GitHub-Api-Version":
+          "2022-11-28",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "GitHub profile request failed"
+    );
+  }
+
+  return response.json();
+};
+
+const getGithubEmail = async (
+  githubUser,
+  accessToken
+) => {
+  if (githubUser.email) {
+    return githubUser.email;
+  }
+
+  const emails =
+    await githubRequest(
+      "/user/emails",
+      accessToken
+    );
+
+  const primaryEmail =
+    emails.find(
+      (email) =>
+        email.primary &&
+        email.verified
+    ) ||
+    emails.find(
+      (email) => email.verified
+    );
+
+  return primaryEmail?.email;
+};
+
+const uploadGithubAvatar = async (
+  avatarUrl,
+  username
+) => {
+  if (!avatarUrl) {
+    return null;
+  }
+
+  const result =
+    await cloudinary.uploader.upload(
+      avatarUrl,
+      {
+        folder: "github-avatars",
+        public_id:
+          `github-${username}`,
+        overwrite: true,
+        resource_type: "image",
+      }
+    );
+
+  return result.secure_url;
+};
+
+const getAvailableUsername = async (
+  username,
+  currentUserId
+) => {
+  const normalizedUsername =
+    username
+      ?.toLowerCase()
+      .replace(
+        /[^a-z0-9_-]/g,
+        "-"
+      ) || "github-user";
+
+  const where = {
+    username:
+      normalizedUsername,
   };
 
-export const loginUser =
+  if (currentUserId) {
+    where.NOT = {
+      id: currentUserId,
+    };
+  }
+
+  const existingUser =
+    await prisma.user.findFirst({
+      where,
+      select: {
+        id: true,
+      },
+    });
+
+  if (!existingUser) {
+    return normalizedUsername;
+  }
+
+  return `${normalizedUsername}-${Date.now()}`;
+};
+
+const redirectWithError = (
+  res,
+  message
+) => {
+  const params =
+    new URLSearchParams({
+      error: message,
+    });
+
+  return res.redirect(
+    `${getClientUrl()}/login?${params.toString()}`
+  );
+};
+
+export const githubLogin = (
+  req,
+  res
+) => {
+  if (
+    !process.env.GITHUB_CLIENT_ID ||
+    !process.env.GITHUB_CLIENT_SECRET
+  ) {
+    return res.status(500).json({
+      success: false,
+      message:
+        "GitHub OAuth is not configured",
+    });
+  }
+
+  const params =
+    new URLSearchParams({
+      client_id:
+        process.env.GITHUB_CLIENT_ID,
+      redirect_uri:
+        getGithubRedirectUri(),
+      scope:
+        "read:user user:email",
+      allow_signup: "true",
+    });
+
+  return res.redirect(
+    `${githubAuthorizeUrl}?${params.toString()}`
+  );
+};
+
+export const githubCallback =
   async (req, res) => {
     try {
+      const { code } = req.query;
 
-      const {
-        institute_email,
-        password,
-      } = req.body;
-
-      if (
-        !institute_email ||
-        !password
-      ) {
-
-        return res.status(400).json({
-          success: false,
-          message:
-            "Please provide institute email and password",
-        });
+      if (!code) {
+        return redirectWithError(
+          res,
+          "GitHub authorization code missing"
+        );
       }
 
-      const user =
-        await prisma.user.findUnique({
-          where: {
-            institute_email,
-          },
-        });
-
-      if (!user) {
-
-        return res.status(400).json({
-          success: false,
-          message:
-            "Invalid credentials",
-        });
-      }
-
-      const isPasswordMatched =
-        await bcrypt.compare(
-          password,
-          user.password
+      const githubAccessToken =
+        await getGithubAccessToken(
+          code
         );
 
-      if (
-        !isPasswordMatched
-      ) {
+      const githubUser =
+        await githubRequest(
+          "/user",
+          githubAccessToken
+        );
 
-        return res.status(400).json({
-          success: false,
-          message:
-            "Invalid credentials",
-        });
+      const email =
+        await getGithubEmail(
+          githubUser,
+          githubAccessToken
+        );
+
+      if (!email) {
+        return redirectWithError(
+          res,
+          "Verified GitHub email not found"
+        );
       }
 
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
+      const githubId =
+        String(githubUser.id);
 
-        data: {
-          last_login:
-            getISTTime(),
-        },
-      });
+      const existingUser =
+        (await prisma.user.findUnique({
+          where: {
+            github_id: githubId,
+          },
+        })) ||
+        (await prisma.user.findFirst({
+          where: {
+            email,
+          },
+        }));
+
+      const username =
+        await getAvailableUsername(
+          githubUser.login,
+          existingUser?.id
+        );
+
+      const avatar =
+        await uploadGithubAvatar(
+          githubUser.avatar_url,
+          username
+        );
+
+      const userData = {
+        github_id: githubId,
+        name:
+          githubUser.name ||
+          githubUser.login,
+        username,
+        email,
+        avatar,
+        last_login: getISTTime(),
+      };
+
+      const user = existingUser
+        ? await prisma.user.update({
+            where: {
+              id: existingUser.id,
+            },
+            data: userData,
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              email: true,
+              avatar: true,
+              created_at: true,
+            },
+          })
+        : await prisma.user.create({
+            data: userData,
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              email: true,
+              avatar: true,
+              created_at: true,
+            },
+          });
 
       const accessToken =
-        generateAccessToken(
-          user.id
-        );
+        generateAccessToken(user.id);
 
       const refreshToken =
-        generateRefreshToken(
+        await createRefreshToken(
           user.id
         );
 
-      await prisma.refreshToken.create({
-        data: {
+      const params =
+        new URLSearchParams({
+          accessToken,
+          refreshToken,
+          user: JSON.stringify(user),
+        });
 
-          user_id:
-            user.id,
-
-          token:
-            refreshToken,
-
-          expires_at:
-            new Date(
-              Date.now() +
-              7 *
-                24 *
-                60 *
-                60 *
-                1000
-            ),
-        },
-      });
-
-      return res.status(200).json({
-        success: true,
-        message:
-          "Login successful",
-
-        accessToken,
-
-        refreshToken,
-
-        user: {
-          id: user.id,
-          name: user.name,
-          username:
-            user.username,
-
-          institute_email:
-            user.institute_email,
-
-          recovery_email:
-            user.recovery_email,
-        },
-      });
+      return res.redirect(
+        `${getClientUrl()}/auth/github/callback?${params.toString()}`
+      );
 
     } catch (error) {
-
       console.log(error);
 
-      return res.status(500).json({
-        success: false,
-        message:
-          "Server Error",
-      });
+      return redirectWithError(
+        res,
+        "GitHub login failed"
+      );
     }
   };

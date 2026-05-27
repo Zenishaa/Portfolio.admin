@@ -1,8 +1,8 @@
 import express from "express";
 
 import {
-  registerUser,
-  loginUser,
+  githubLogin,
+  githubCallback,
 } from "../controllers/auth.controller.js";
 
 import {
@@ -11,16 +11,16 @@ import {
 
 const router = express.Router();
 
-router.post(
-  "/register",
+router.get(
+  "/github",
   authLimiter,
-  registerUser
+  githubLogin
 );
 
-router.post(
-  "/login",
+router.get(
+  "/github/callback",
   authLimiter,
-  loginUser
+  githubCallback
 );
 
 export default router;

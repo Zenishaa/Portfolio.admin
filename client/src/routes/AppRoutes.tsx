@@ -6,7 +6,7 @@ import {
 
 import Landing from "../pages/Landing";
 import Login from "../pages/Login";
-import Register from "../pages/Register";
+import AuthCallback from "../pages/AuthCallback";
 import Dashboard from "../pages/Dashboard";
 import Projects from "../pages/Projects";
 import CreateProject from "../pages/CreateProject";
@@ -31,11 +31,9 @@ function AppRoutes() {
           element={<Login />}
         />
 
-        {/* Register */}
-
         <Route
-          path="/register"
-          element={<Register />}
+          path="/auth/github/callback"
+          element={<AuthCallback />}
         />
 
         {/* Dashboard */}

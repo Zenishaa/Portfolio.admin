@@ -200,31 +200,8 @@ function App() {
                 />
               </button>
 
-              {/* Register */}
-
-              <button
-                onClick={() =>
-                  handleNavigation("/register")
-                }
-                className="
-                  rounded-2xl
-                  border
-                  border-[var(--border-color)]
-                  bg-[var(--bg-card)]
-                  px-5
-                  py-2.5
-                  text-sm
-                  font-medium
-                  transition-all
-                  duration-300
-                  hover:bg-[var(--bg-secondary)]
-                "
-              >
-                Register
-              </button>
-
               {/* Login */}
-
+{/* 
               <button
                 onClick={() =>
                   handleNavigation("/login")
@@ -244,7 +221,7 @@ function App() {
                 "
               >
                 Login
-              </button>
+              </button> */}
             </div>
           </div>
         </header>

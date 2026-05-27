@@ -1,9 +1,5 @@
 import {
   ArrowRight,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
   Moon,
   Sun,
 } from "lucide-react";
@@ -21,9 +17,6 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] =
-    useState(false);
-
   const [loading, setLoading] =
     useState(false);
 
@@ -35,6 +28,15 @@ function Login() {
     setTimeout(() => {
       navigate(path);
     }, 700);
+  };
+
+  const handleGithubLogin = () => {
+    const apiUrl =
+      import.meta.env.VITE_API_URL ||
+      "https://portfolio-admin-7es8.onrender.com";
+
+    window.location.href =
+      `${apiUrl}/api/auth/github`;
   };
 
   return (
@@ -320,275 +322,162 @@ function Login() {
               RIGHT SIDE
           ========================= */}
 
+
+        <div
+          className="
+            mx-auto
+            w-full
+            max-w-md
+          "
+        >
+          {/* CARD */}
+
           <div
             className="
-              mx-auto
-              w-full
-              max-w-md
+              rounded-[32px]
+              border
+              border-[var(--border-color)]
+              bg-[var(--bg-card)]
+              p-6
+              shadow-xl
+              sm:p-8
             "
+            style={{
+              boxShadow:
+                "0 10px 30px var(--shadow-color)",
+            }}
           >
-            {/* Card */}
+            {/* TOP */}
 
-            <div
-              className="
-                rounded-[32px]
-                border
-                border-[var(--border-color)]
-                bg-[var(--bg-card)]
-                p-6
-                shadow-xl
-                sm:p-8
-              "
-              style={{
-                boxShadow:
-                  "0 10px 30px var(--shadow-color)",
-              }}
-            >
-              {/* Top */}
+            <div className="text-center">
 
-              <div className="text-center">
-                <h2
-                  className="
-                    text-3xl
-                    font-bold
-                  "
-                >
-                  Welcome Back
-                </h2>
-
-                <p
-                  className="
-                    mt-2
-                    text-sm
-                    text-[var(--text-secondary)]
-                  "
-                >
-                  Login to your admin dashboard
-                </p>
-              </div>
-
-              {/* Form */}
-
-              <form className="mt-8 space-y-5">
-                {/* Email */}
-
-                <div>
-                  <label
-                    className="
-                      mb-2
-                      block
-                      text-sm
-                      font-medium
-                    "
-                  >
-                    Email
-                  </label>
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      rounded-2xl
-                      border
-                      border-[var(--border-color)]
-                      bg-[var(--bg-main)]
-                      px-4
-                      py-3
-                    "
-                  >
-                    <Mail
-                      size={18}
-                      className="
-                        text-[var(--text-secondary)]
-                      "
-                    />
-
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      className="
-                        w-full
-                        bg-transparent
-                        outline-none
-                        placeholder:text-[var(--text-muted)]
-                      "
-                    />
-                  </div>
-                </div>
-
-                {/* Password */}
-
-                <div>
-                  <label
-                    className="
-                      mb-2
-                      block
-                      text-sm
-                      font-medium
-                    "
-                  >
-                    Password
-                  </label>
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      rounded-2xl
-                      border
-                      border-[var(--border-color)]
-                      bg-[var(--bg-main)]
-                      px-4
-                      py-3
-                    "
-                  >
-                    <LockKeyhole
-                      size={18}
-                      className="
-                        text-[var(--text-secondary)]
-                      "
-                    />
-
-                    <input
-                      type={
-                        showPassword
-                          ? "text"
-                          : "password"
-                      }
-                      placeholder="Enter your password"
-                      className="
-                        w-full
-                        bg-transparent
-                        outline-none
-                        placeholder:text-[var(--text-muted)]
-                      "
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowPassword(
-                          !showPassword
-                        )
-                      }
-                    >
-                      {showPassword ? (
-                        <EyeOff
-                          size={18}
-                          className="
-                            text-[var(--text-secondary)]
-                          "
-                        />
-                      ) : (
-                        <Eye
-                          size={18}
-                          className="
-                            text-[var(--text-secondary)]
-                          "
-                        />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Options */}
-
-                <div
-                  className="
-                    flex
-                    items-center
-                    justify-between
-                  "
-                >
-                  <label
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      text-sm
-                      text-[var(--text-secondary)]
-                    "
-                  >
-                    <input
-                      type="checkbox"
-                      className="
-                        h-4
-                        w-4
-                      "
-                    />
-
-                    Remember me
-                  </label>
-
-                  <button
-                    type="button"
-                    className="
-                      text-sm
-                      font-medium
-                      text-[var(--button-primary)]
-                    "
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
-
-                {/* Login Button */}
-
-                <button
-                  className="
-                    flex
-                    w-full
-                    items-center
-                    justify-center
-                    gap-2
-                    rounded-2xl
-                    bg-[var(--button-primary)]
-                    px-6
-                    py-3.5
-                    font-medium
-                    text-white
-                    transition-all
-                    duration-300
-                    hover:bg-[var(--button-primary-hover)]
-                    dark:text-black
-                  "
-                >
-                  Login
-
-                  <ArrowRight size={18} />
-                </button>
-              </form>
-
-              {/* Bottom */}
+              <h2
+                className="
+                  text-3xl
+                  font-bold
+                "
+              >
+                Welcome Back
+              </h2>
 
               <p
                 className="
-                  mt-6
-                  text-center
+                  mt-2
                   text-sm
                   text-[var(--text-secondary)]
                 "
               >
-                Don&apos;t have an account?{" "}
+                Continue securely using GitHub
+              </p>
 
-                <button
-                  onClick={() =>
-                    handleNavigation(
-                      "/register"
-                    )
-                  }
+            </div>
+
+            {/* =========================
+                GITHUB AUTH
+            ========================= */}
+
+            <div className="mt-10">
+
+              {/* GITHUB BUTTON */}
+
+              <button
+                onClick={handleGithubLogin}
+                className="
+                  flex
+                  w-full
+                  items-center
+                  justify-center
+                  gap-4
+                  rounded-2xl
+                  border
+                  border-[var(--border-color)]
+                  bg-[var(--bg-main)]
+                  px-6
+                  py-4
+                  transition-all
+                  duration-300
+                  hover:scale-[1.01]
+                  hover:border-[var(--button-primary)]
+                  hover:shadow-lg
+                "
+              >
+                {/* GitHub Icon */}
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
                   className="
-                    font-medium
-                    text-[var(--button-primary)]
+                    h-6
+                    w-6
                   "
                 >
-                  Register
-                </button>
-              </p>
+                  <path d="M12 0C5.37 0 0 5.37 0 12a12 12 0 008.21 11.39c.6.11.82-.26.82-.58v-2.23c-3.34.72-4.04-1.41-4.04-1.41-.55-1.38-1.34-1.75-1.34-1.75-1.1-.75.08-.74.08-.74 1.21.08 1.85 1.24 1.85 1.24 1.08 1.85 2.83 1.31 3.52 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.47-1.33-5.47-5.92 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23A11.4 11.4 0 0112 5.8c1.02 0 2.05.14 3.01.41 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.6-2.81 5.61-5.49 5.91.43.37.82 1.1.82 2.22v3.29c0 .32.22.7.83.58A12 12 0 0024 12c0-6.63-5.37-12-12-12z" />
+                </svg>
+
+                <div className="text-left">
+
+                  <p
+                    className="
+                      text-sm
+                      text-[var(--text-secondary)]
+                    "
+                  >
+                    Continue with
+                  </p>
+
+                  <h3
+                    className="
+                      text-base
+                      font-semibold
+                    "
+                  >
+                    GitHub Authentication
+                  </h3>
+
+                </div>
+
+                <ArrowRight
+                  size={18}
+                  className="
+                    ml-auto
+                    text-[var(--text-secondary)]
+                  "
+                />
+
+              </button>
+
+              {/* Info Card */}
+
+              <div
+                className="
+                  mt-8
+                  rounded-2xl
+                  border
+                  border-[var(--border-color)]
+                  bg-[var(--bg-main)]
+                  p-5
+                "
+              >
+                <p
+                  className="
+                    text-sm
+                    leading-relaxed
+                    text-[var(--text-secondary)]
+                  "
+                >
+                  Secure OAuth authentication
+                  powered by GitHub. Access
+                  your admin dashboard
+                  instantly without managing
+                  passwords manually.
+                </p>
+
+              </div>
+
             </div>
-          </div>
+            </div>
+        </div>
         </main>
       </div>
     </>
