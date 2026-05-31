@@ -9,6 +9,7 @@ import PageLoader
 from "../components/ui/PageLoader";
 
 function AuthCallback() {
+
   const navigate =
     useNavigate();
 
@@ -29,16 +30,29 @@ function AuthCallback() {
         "refreshToken"
       );
 
-    /* =====================
-        VALIDATION
-    ===================== */
+    /*
+    ====================
+    GITHUB SUCCESS
+    ====================
+    */
 
     if (
-      !accessToken ||
-      !refreshToken
+      accessToken &&
+      refreshToken
     ) {
+
+      localStorage.setItem(
+        "accessToken",
+        accessToken
+      );
+
+      localStorage.setItem(
+        "refreshToken",
+        refreshToken
+      );
+
       navigate(
-        "/login?error=github",
+        "/dashboard",
         {
           replace: true,
         }
@@ -47,36 +61,45 @@ function AuthCallback() {
       return;
     }
 
-    /* =====================
-        STORE TOKENS
-    ===================== */
+    /*
+    ====================
+    ALREADY LOGGED IN
+    ====================
+    */
 
-    localStorage.setItem(
-      "accessToken",
-      accessToken
-    );
+    const storedAccessToken =
+      localStorage.getItem(
+        "accessToken"
+      );
 
-    localStorage.setItem(
-      "refreshToken",
-      refreshToken
-    );
+    const storedRefreshToken =
+      localStorage.getItem(
+        "refreshToken"
+      );
 
-    /* =====================
-        CLEAN URL
-    ===================== */
+    if (
+      storedAccessToken &&
+      storedRefreshToken
+    ) {
 
-    window.history.replaceState(
-      {},
-      document.title,
-      "/dashboard"
-    );
+      navigate(
+        "/dashboard",
+        {
+          replace: true,
+        }
+      );
 
-    /* =====================
-        REDIRECT
-    ===================== */
+      return;
+    }
+
+    /*
+    ====================
+    LOGIN FAILED
+    ====================
+    */
 
     navigate(
-      "/dashboard",
+      "/login?error=github",
       {
         replace: true,
       }
@@ -84,7 +107,9 @@ function AuthCallback() {
 
   }, [navigate]);
 
-  return <PageLoader />;
+  return (
+    <PageLoader />
+  );
 }
 
 export default AuthCallback;
