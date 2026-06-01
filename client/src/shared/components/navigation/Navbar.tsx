@@ -7,6 +7,12 @@ import {
 } from "lucide-react";
 
 import { useTheme } from "next-themes";
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
+import { useNavigate } from "react-router-dom";
 import PageLoader from "@shared/components/ui/PageLoader";
 import { usePageNavigation } from "@shared/hooks/usePageNavigation";
 
@@ -19,12 +25,37 @@ function Navbar({
     value: boolean
   ) => void;
 }) {
-  const { theme, setTheme } =
-    useTheme();
+  const { theme, setTheme } = useTheme();
+  const { loading } = usePageNavigation();
+  const navigate = useNavigate();
 
-    const { loading,
-        
-    } = usePageNavigation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = useState<{name: string, avatar: string | null}>({
+    name: "Admin User",
+    avatar: null
+  });
+
+  useEffect(() => {
+    // Read from localStorage on mount
+    const storedName = localStorage.getItem("userName");
+    const storedAvatar = localStorage.getItem("userAvatar");
+    
+    if (storedName || storedAvatar) {
+      setUser({
+        name: storedName || "Admin User",
+        avatar: storedAvatar || null
+      });
+    }
+  }, []);
+
+  const handleSearchSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to projects with search query
+      navigate(`/projects?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+    }
+  };
 
   return (
     <>
@@ -70,7 +101,8 @@ function Navbar({
 
         {/* Search */}
 
-        <div
+        <form
+          onSubmit={handleSearchSubmit}
           className="
             hidden
             items-center
@@ -93,14 +125,16 @@ function Navbar({
 
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search projects..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="
               bg-transparent
               outline-none
               placeholder:text-[var(--text-muted)]
             "
           />
-        </div>
+        </form>
       </div>
 
       {/* Right */}
@@ -201,26 +235,34 @@ function Navbar({
             py-2
           "
         >
-          <div
-            className="
-              flex
-              h-10
-              w-10
-              items-center
-              justify-center
-              rounded-xl
-              bg-[var(--button-primary)]
-              font-semibold
-              text-white
-              dark:text-black
-            "
-          >
-            P
-          </div>
+          {user.avatar ? (
+            <img 
+              src={user.avatar} 
+              alt={user.name} 
+              className="h-10 w-10 rounded-xl object-cover"
+            />
+          ) : (
+            <div
+              className="
+                flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-xl
+                bg-[var(--button-primary)]
+                font-semibold
+                text-white
+                dark:text-black
+              "
+            >
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+          )}
 
           <div className="hidden lg:block">
             <h3 className="text-sm font-medium">
-              Prem Raichura
+              {user.name}
             </h3>
 
             <p

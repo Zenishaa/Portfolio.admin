@@ -8,6 +8,8 @@ import {
 import PageLoader
 from "@shared/components/ui/PageLoader";
 
+import api from "@shared/lib/api";
+
 function AuthCallback() {
 
   const navigate =
@@ -36,28 +38,32 @@ function AuthCallback() {
     ====================
     */
 
-    if (
-      accessToken &&
-      refreshToken
-    ) {
+    const handleGithubSuccess = async () => {
+      if (accessToken && refreshToken) {
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
 
-      localStorage.setItem(
-        "accessToken",
-        accessToken
-      );
-
-      localStorage.setItem(
-        "refreshToken",
-        refreshToken
-      );
-
-      navigate(
-        "/dashboard",
-        {
-          replace: true,
+        try {
+          const res = await api.get("/api/user/me", {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          
+          if (res.data?.success && res.data.user) {
+            localStorage.setItem("userName", res.data.user.name || res.data.user.username);
+            if (res.data.user.avatar) {
+              localStorage.setItem("userAvatar", res.data.user.avatar);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch user details during login", error);
         }
-      );
 
+        navigate("/dashboard", { replace: true });
+      }
+    };
+
+    if (accessToken && refreshToken) {
+      handleGithubSuccess();
       return;
     }
 
