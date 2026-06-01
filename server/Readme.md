@@ -209,17 +209,33 @@ server/
 ├── prisma/
 ├── src/
 │   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── queues/
-│   ├── routes/
+│   ├── features/
+│   │   ├── analytics/
+│   │   ├── apiKeys/
+│   │   ├── auth/
+│   │   ├── certificates/
+│   │   ├── dashboard/
+│   │   ├── experience/
+│   │   ├── health/
+│   │   ├── hero/
+│   │   ├── logs/
+│   │   ├── projects/
+│   │   ├── public/
+│   │   ├── tokens/
+│   │   └── users/
+│   ├── jobs/
+│   │   ├── analytics/
+│   │   └── logs/
+│   ├── shared/
+│   │   └── middleware/
 │   ├── utils/
-│   ├── workers/
 │   └── app.js
 ├── Dockerfile
 ├── docker-compose.yml
 └── package.json
 ```
+
+Each feature folder owns its route and controller files. Background queue definitions and workers live together in `jobs/`, while reusable HTTP middleware lives in `shared/middleware/`. Shared infrastructure such as database clients, upload config, utilities, and Prisma generated files stays outside `features/`.
 
 ---
 

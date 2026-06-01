@@ -7,33 +7,33 @@ import path from "path";
 
 import {
   apiLimiter,
-} from "./middleware/rateLimit.middleware.js";
+} from "./shared/middleware/rateLimit/rateLimit.middleware.js";
 
 import {
   apiGateway,
-} from "./middleware/apiGateway.middleware.js";
+} from "./shared/middleware/gateway/apiGateway.middleware.js";
 
 import {
   securityMiddleware,
 } from "./config/security.js";
 
-import tokenRoutes from "./routes/token.routes.js";
+import tokenRoutes from "./features/tokens/token.routes.js";
 
-import "./workers/analytics.worker.js";
-import "./workers/logs.worker.js";
+import "./jobs/analytics/analytics.worker.js";
+import "./jobs/logs/logs.worker.js";
 
-import healthRoutes from "./routes/health.routes.js";
-import authRoutes from "./routes/auth.routes.js";
-import userRoutes from "./routes/user.routes.js";
-import heroRoutes from "./routes/hero.routes.js";
-import projectRoutes from "./routes/project.routes.js";
-import experienceRoutes from "./routes/experience.routes.js";
-import certificateRoutes from "./routes/certificate.routes.js";
-import publicRoutes from "./routes/public.routes.js";
-import apiRoutes from "./routes/api.routes.js";
-import dashboardRoutes from "./routes/dashboard.routes.js";
-import analyticsRoutes from "./routes/analytics.routes.js";
-import logsRoutes from "./routes/logs.routes.js";
+import healthRoutes from "./features/health/health.routes.js";
+import authRoutes from "./features/auth/auth.routes.js";
+import userRoutes from "./features/users/user.routes.js";
+import heroRoutes from "./features/hero/hero.routes.js";
+import projectRoutes from "./features/projects/project.routes.js";
+import experienceRoutes from "./features/experience/experience.routes.js";
+import certificateRoutes from "./features/certificates/certificate.routes.js";
+import publicRoutes from "./features/public/public.routes.js";
+import apiRoutes from "./features/apiKeys/apiKey.routes.js";
+import dashboardRoutes from "./features/dashboard/dashboard.routes.js";
+import analyticsRoutes from "./features/analytics/analytics.routes.js";
+import logsRoutes from "./features/logs/logs.routes.js";
 
 
 dotenv.config();
