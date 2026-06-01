@@ -9,6 +9,7 @@ import {
 
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -40,6 +41,15 @@ interface ProjectLink {
   value: string;
 }
 
+/* =========================
+    STATUS FILTERS CONFIG
+========================= */
+
+const RESEARCH_STATUSES = ["published", "drafted", "underreview"] as const;
+const PROJECT_STATUSES = ["ongoing", "completed"] as const;
+
+type TypeFilter = "all" | "research" | "project";
+
 function Projects() {
   const { handleNavigation } = usePageNavigation();
 
@@ -60,7 +70,25 @@ function Projects() {
       FILTER STATE
   ========================= */
 
-  const [activeFilter, setActiveFilter] = useState<"all" | "published" | "draft">("all");
+  const [activeTypeFilter, setActiveTypeFilter] = useState<TypeFilter>("all");
+  const [activeStatusFilter, setActiveStatusFilter] = useState<string>("all");
+
+  // Reset status filter when type changes
+  const handleTypeFilterChange = (type: TypeFilter) => {
+    setActiveTypeFilter(type);
+    setActiveStatusFilter("all");
+  };
+
+  // Get available status filters based on selected type
+  const statusFilters = useMemo(() => {
+    if (activeTypeFilter === "research") {
+      return ["all", ...RESEARCH_STATUSES];
+    }
+    if (activeTypeFilter === "project") {
+      return ["all", ...PROJECT_STATUSES];
+    }
+    return [];
+  }, [activeTypeFilter]);
 
   const parseJsonArray = <T,>(
     value: unknown
@@ -223,6 +251,17 @@ function Projects() {
         value.slice(1)
       : undefined;
 
+  const STATUS_LABELS: Record<string, string> = {
+    ongoing: "Ongoing",
+    completed: "Completed",
+    published: "Published",
+    drafted: "Drafted",
+    underreview: "Under Review",
+  };
+
+  const formatStatus = (value?: string | null) =>
+    value ? STATUS_LABELS[value] ?? formatLabel(value) : undefined;
+
   const fetchProjects = async () => {
     try {
       const response = await api.get("/api/projects");
@@ -248,21 +287,27 @@ function Projects() {
     };
   }, []);
 
-  const filteredProjects = projects.filter((project) => {
-    if (activeFilter === "all") return true;
-    if (activeFilter === "published") {
-      return [
-        "published",
-        "completed",
-      ].includes(project.status || "");
-    }
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project) => {
+      // Type filter
+      if (activeTypeFilter !== "all") {
+        const projectType = (project.type || "").toLowerCase();
+        if (projectType !== activeTypeFilter) {
+          return false;
+        }
+      }
 
-    return [
-      "draft",
-      "drafted",
-      "ongoing",
-    ].includes(project.status || "");
-  });
+      // Status sub-filter
+      if (activeStatusFilter !== "all") {
+        const projectStatus = (project.status || "").toLowerCase();
+        if (projectStatus !== activeStatusFilter) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [projects, activeTypeFilter, activeStatusFilter]);
 
   if (projectsLoading) {
     return <PageLoader />;
@@ -322,7 +367,7 @@ function Projects() {
       </div>
 
       {/* =========================
-          SEARCH + FILTER
+          FILTERS + VIEW TOGGLE
       ========================= */}
 
       <div
@@ -338,30 +383,66 @@ function Projects() {
       >
         {/* Filters */}
 
-        <div className="flex items-center gap-3">
-          {(["all", "published", "draft"] as const).map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`
-                rounded-2xl
-                border
-                px-4
-                py-2.5
-                text-sm
-                font-medium
-                transition-all
-                duration-300
-                ${
-                  activeFilter === filter
-                    ? "border-[var(--button-primary)] bg-[var(--button-primary)] text-white dark:text-black"
-                    : "border-[var(--border-color)] bg-[var(--bg-card)]"
-                }
-              `}
-            >
-              {filter.charAt(0).toUpperCase() + filter.slice(1)}
-            </button>
-          ))}
+        <div className="flex flex-col gap-3">
+          {/* Type Filters */}
+
+          <div className="flex items-center gap-3">
+            {(["all", "research", "project"] as const).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => handleTypeFilterChange(filter)}
+                className={`
+                  rounded-2xl
+                  border
+                  px-4
+                  py-2.5
+                  text-sm
+                  font-medium
+                  transition-all
+                  duration-300
+                  ${
+                    activeTypeFilter === filter
+                      ? "border-[var(--button-primary)] bg-[var(--button-primary)] text-white dark:text-black"
+                      : "border-[var(--border-color)] bg-[var(--bg-card)]"
+                  }
+                `}
+              >
+                {filter.charAt(0).toUpperCase() + filter.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Status Sub-Filters (only when a specific type is selected) */}
+
+          {statusFilters.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              {statusFilters.map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setActiveStatusFilter(filter)}
+                  className={`
+                    rounded-xl
+                    border
+                    px-3
+                    py-1.5
+                    text-xs
+                    font-medium
+                    transition-all
+                    duration-300
+                    ${
+                      activeStatusFilter === filter
+                        ? "border-[var(--button-primary)] bg-[var(--button-primary)]/10 text-[var(--button-primary)]"
+                        : "border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)]"
+                    }
+                  `}
+                >
+                  {filter === "underreview"
+                    ? "Under Review"
+                    : filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* VIEW TOGGLE */}
@@ -436,9 +517,9 @@ function Projects() {
           <h3 className="text-xl font-semibold">No Projects Found</h3>
 
           <p className="mt-2 text-[var(--text-secondary)]">
-            {activeFilter === "all"
+            {activeTypeFilter === "all" && activeStatusFilter === "all"
               ? "Create your first project."
-              : `No ${activeFilter} projects yet.`}
+              : `No ${activeStatusFilter !== "all" ? activeStatusFilter : ""} ${activeTypeFilter !== "all" ? activeTypeFilter : ""} projects yet.`.trim().replace(/\s+/g, " ")}
           </p>
         </div>
       )}
@@ -464,7 +545,7 @@ function Projects() {
               title={project.title}
               description={project.description}
               featured={project.featured}
-              status={project.status}
+              status={formatStatus(project.status)}
               tags={getProjectTags(project)}
               thumbnail={getProjectThumbnail(project)}
               dateLabel={
@@ -474,7 +555,9 @@ function Projects() {
               metaLabel={
                 [
                   formatLabel(project.type),
-                  project.publisher,
+                  (project.type || "").toLowerCase() === "research" && project.publisher
+                    ? project.publisher
+                    : null,
                 ]
                   .filter(Boolean)
                   .join(" / ")
@@ -607,7 +690,7 @@ function Projects() {
                     </span>
                   )}
 
-                  {project.publisher && (
+                  {(project.type || "").toLowerCase() === "research" && project.publisher && (
                     <span>
                       {project.publisher}
                     </span>
@@ -709,7 +792,7 @@ function Projects() {
                     }
                   `}
                 >
-                  {project.status}
+                  {formatStatus(project.status)}
                 </div>
 
                 {/* ACTIONS */}

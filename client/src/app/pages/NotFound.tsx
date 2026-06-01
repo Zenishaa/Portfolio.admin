@@ -312,7 +312,7 @@ function NotFound() {
               </button>
             </div>
           </div>
-
+{/* 
           <div
             className="
               rounded-[32px]
@@ -369,7 +369,7 @@ function NotFound() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
         </section>
       </main>
     </div>

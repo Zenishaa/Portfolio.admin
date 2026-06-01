@@ -170,6 +170,8 @@ model Experience {
 
   links Json?
 
+  images Json?
+
   company String @db.VarChar(255)
 
   created_at DateTime @default(now())

@@ -1,5 +1,8 @@
 import { prisma } from "../../config/db.js";
 import { redis } from "../../config/redis.js";
+import {
+  uploadToCloudinary,
+} from "../../utils/cloudinaryUpload.js";
 
 export const createExperience = async (req, res) => {
   try {
@@ -34,6 +37,27 @@ export const createExperience = async (req, res) => {
       });
     }
 
+    let uploadedImages = [];
+
+    if (
+      req.files &&
+      req.files.length > 0
+    ) {
+      uploadedImages =
+        await Promise.all(
+          req.files.map(
+            async (file) => {
+              const uploaded =
+                await uploadToCloudinary(
+                  file.buffer,
+                  "experiences"
+                );
+              return uploaded.secure_url;
+            }
+          )
+        );
+    }
+
     const experience =
       await prisma.experience.create({
         data: {
@@ -49,6 +73,7 @@ export const createExperience = async (req, res) => {
             : null,
           is_current,
           links,
+          images: uploadedImages,
           company,
           location,
           mode,
@@ -185,6 +210,28 @@ export const updateExperience = async (req, res) => {
       }
     }
 
+    let uploadedImages =
+      existingExperience.images || [];
+
+    if (
+      req.files &&
+      req.files.length > 0
+    ) {
+      uploadedImages =
+        await Promise.all(
+          req.files.map(
+            async (file) => {
+              const uploaded =
+                await uploadToCloudinary(
+                  file.buffer,
+                  "experiences"
+                );
+              return uploaded.secure_url;
+            }
+          )
+        );
+    }
+
     const updatedExperience =
       await prisma.experience.update({
         where: {
@@ -198,6 +245,7 @@ export const updateExperience = async (req, res) => {
           end_date: req.body.end_date
             ? new Date(req.body.end_date)
             : existingExperience.end_date,
+          images: uploadedImages,
         },
       });
     await redis.del(`portfolio:${userId}`);
