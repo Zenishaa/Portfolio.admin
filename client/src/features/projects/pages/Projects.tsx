@@ -1,5 +1,8 @@
 import {
+  Calendar,
+  ExternalLink,
   Grid2X2,
+  GitBranch,
   LayoutList,
   Plus,
 } from "lucide-react";
@@ -18,10 +21,23 @@ import api from "@shared/lib/api";
 interface Project {
   id: number;
   title: string;
-  description: string;
+  slug?: string | null;
+  description?: string | null;
+  publisher?: string | null;
   featured: boolean;
-  status: string;
-  tags: string[];
+  status?: string | null;
+  type?: string | null;
+  tags?: unknown;
+  links?: unknown;
+  thumbnail?: unknown;
+  authors_contributors?: unknown;
+  date_time?: string | null;
+  created_at?: string | null;
+}
+
+interface ProjectLink {
+  key: string;
+  value: string;
 }
 
 function Projects() {
@@ -45,6 +61,167 @@ function Projects() {
   ========================= */
 
   const [activeFilter, setActiveFilter] = useState<"all" | "published" | "draft">("all");
+
+  const parseJsonArray = <T,>(
+    value: unknown
+  ): T[] => {
+    if (Array.isArray(value)) {
+      return value as T[];
+    }
+
+    if (typeof value !== "string") {
+      return [];
+    }
+
+    try {
+      const parsed =
+        JSON.parse(value);
+
+      return Array.isArray(parsed)
+        ? parsed as T[]
+        : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const getProjectLinks = (
+    project: Project
+  ) =>
+    parseJsonArray<ProjectLink>(
+      project.links
+    ).filter(
+      (link) =>
+        link.key &&
+        link.value
+    );
+
+  const getProjectLink = (
+    project: Project,
+    keys: string[]
+  ) =>
+    getProjectLinks(project).find(
+      (link) =>
+        keys.includes(
+          link.key
+        )
+    )?.value;
+
+  const getProjectTags = (
+    project: Project
+  ) =>
+    parseJsonArray<string>(
+      project.tags
+    );
+
+  const getProjectContributors = (
+    project: Project
+  ) =>
+    parseJsonArray<string>(
+      project.authors_contributors
+    );
+
+  const getProjectThumbnail = (
+    project: Project
+  ) => {
+    const thumbnail =
+      project.thumbnail;
+
+    if (!thumbnail) {
+      return undefined;
+    }
+
+    let imageUrl: unknown =
+      thumbnail;
+
+    if (typeof thumbnail === "string") {
+      try {
+        const parsed =
+          JSON.parse(thumbnail);
+
+        imageUrl =
+          parsed;
+      } catch {
+        imageUrl =
+          thumbnail;
+      }
+    }
+
+    if (
+      imageUrl &&
+      typeof imageUrl === "object"
+    ) {
+      const imageRecord =
+        imageUrl as {
+          secure_url?: string;
+          url?: string;
+          src?: string;
+        };
+
+      imageUrl =
+        imageRecord.secure_url ||
+        imageRecord.url ||
+        imageRecord.src;
+    }
+
+    if (
+      typeof imageUrl !== "string" ||
+      !imageUrl.trim()
+    ) {
+      return undefined;
+    }
+
+    const trimmedUrl =
+      imageUrl.trim();
+
+    if (
+      /^(https?:|data:|blob:)/i.test(
+        trimmedUrl
+      )
+    ) {
+      return trimmedUrl;
+    }
+
+    const apiUrl =
+      import.meta.env.VITE_API_URL;
+
+    if (!apiUrl) {
+      return trimmedUrl;
+    }
+
+    return `${String(apiUrl).replace(/\/$/, "")}/${trimmedUrl.replace(/^\//, "")}`;
+  };
+
+  const formatDate = (
+    value?: string | null
+  ) => {
+    if (!value) {
+      return undefined;
+    }
+
+    const date =
+      new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+      return undefined;
+    }
+
+    return new Intl.DateTimeFormat(
+      "en",
+      {
+        month: "short",
+        year: "numeric",
+      }
+    ).format(date);
+  };
+
+  const formatLabel = (
+    value?: string | null
+  ) =>
+    value
+      ? value.charAt(0).toUpperCase() +
+        value.slice(1)
+      : undefined;
 
   const fetchProjects = async () => {
     try {
@@ -73,7 +250,18 @@ function Projects() {
 
   const filteredProjects = projects.filter((project) => {
     if (activeFilter === "all") return true;
-    return project.status === activeFilter;
+    if (activeFilter === "published") {
+      return [
+        "published",
+        "completed",
+      ].includes(project.status || "");
+    }
+
+    return [
+      "draft",
+      "drafted",
+      "ongoing",
+    ].includes(project.status || "");
   });
 
   if (projectsLoading) {
@@ -277,7 +465,62 @@ function Projects() {
               description={project.description}
               featured={project.featured}
               status={project.status}
-              tags={project.tags || []}
+              tags={getProjectTags(project)}
+              thumbnail={getProjectThumbnail(project)}
+              dateLabel={
+                formatDate(project.date_time) ||
+                formatDate(project.created_at)
+              }
+              metaLabel={
+                [
+                  formatLabel(project.type),
+                  project.publisher,
+                ]
+                  .filter(Boolean)
+                  .join(" / ")
+              }
+              codeAction={
+                getProjectLink(project, [
+                  "github",
+                ])
+                  ? {
+                      href: getProjectLink(project, [
+                        "github",
+                      ]),
+                    }
+                  : undefined
+              }
+              externalAction={
+                getProjectLink(project, [
+                  "live",
+                  "figma",
+                  "youtube",
+                  "docs",
+                ])
+                  ? {
+                      href: getProjectLink(project, [
+                        "live",
+                        "figma",
+                        "youtube",
+                        "docs",
+                      ]),
+                    }
+                  : undefined
+              }
+              editAction={{
+                onClick: () =>
+                  handleNavigation(
+                    `/projects/${project.slug || project.id}/edit`
+                  ),
+              }}
+              deleteAction={{
+                onClick: () => {
+                  console.log(
+                    "Delete project",
+                    project.slug || project.id
+                  );
+                },
+              }}
             />
           ))}
         </div>
@@ -312,7 +555,20 @@ function Projects() {
               {/* LEFT */}
 
               <div className="flex-1">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  {getProjectThumbnail(project) && (
+                    <img
+                      src={getProjectThumbnail(project)}
+                      alt={project.title}
+                      className="
+                        h-14
+                        w-14
+                        rounded-2xl
+                        object-cover
+                      "
+                    />
+                  )}
+
                   <h2 className="text-xl font-semibold">{project.title}</h2>
 
                   {project.featured && (
@@ -332,6 +588,51 @@ function Projects() {
                   )}
                 </div>
 
+                <div
+                  className="
+                    mt-3
+                    flex
+                    flex-wrap
+                    items-center
+                    gap-3
+                    text-xs
+                    font-medium
+                    uppercase
+                    text-[var(--text-muted)]
+                  "
+                >
+                  {project.type && (
+                    <span>
+                      {formatLabel(project.type)}
+                    </span>
+                  )}
+
+                  {project.publisher && (
+                    <span>
+                      {project.publisher}
+                    </span>
+                  )}
+
+                  {(project.date_time ||
+                    project.created_at) && (
+                    <span
+                      className="
+                        flex
+                        items-center
+                        gap-1
+                      "
+                    >
+                      <Calendar size={13} />
+                      {formatDate(
+                        project.date_time
+                      ) ||
+                        formatDate(
+                          project.created_at
+                        )}
+                    </span>
+                  )}
+                </div>
+
                 {/* DESCRIPTION */}
 
                 <p
@@ -343,15 +644,29 @@ function Projects() {
                     text-[var(--text-secondary)]
                   "
                 >
-                  {project.description}
+                  {project.description ||
+                    "No description added."}
                 </p>
 
                 {/* TAGS */}
 
+                {getProjectContributors(project).length > 0 && (
+                  <p
+                    className="
+                      mt-3
+                      text-sm
+                      text-[var(--text-secondary)]
+                    "
+                  >
+                    Contributors:{" "}
+                    {getProjectContributors(project).join(", ")}
+                  </p>
+                )}
+
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {(project.tags || []).map((tag, tagIndex) => (
+                  {getProjectTags(project).map((tag) => (
                     <div
-                      key={tagIndex}
+                      key={tag}
                       className="
                         rounded-full
                         bg-[var(--bg-secondary)]
@@ -388,7 +703,7 @@ function Projects() {
                     text-sm
                     font-medium
                     ${
-                      project.status === "published"
+                      ["published", "completed"].includes(project.status || "")
                         ? "bg-green-100 text-green-700"
                         : "bg-orange-100 text-orange-700"
                     }
@@ -399,10 +714,64 @@ function Projects() {
 
                 {/* ACTIONS */}
 
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
+                  {getProjectLink(project, ["github"]) && (
+                    <a
+                      href={getProjectLink(project, ["github"])}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        rounded-xl
+                        border
+                        border-[var(--border-color)]
+                        px-4
+                        py-2
+                        text-sm
+                        font-medium
+                        transition-all
+                        duration-300
+                        hover:bg-[var(--bg-secondary)]
+                      "
+                    >
+                      <GitBranch size={15} />
+                      GitHub
+                    </a>
+                  )}
+
+                  {getProjectLink(project, ["live", "figma", "youtube", "docs"]) && (
+                    <a
+                      href={getProjectLink(project, ["live", "figma", "youtube", "docs"])}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        rounded-xl
+                        border
+                        border-[var(--border-color)]
+                        px-4
+                        py-2
+                        text-sm
+                        font-medium
+                        transition-all
+                        duration-300
+                        hover:bg-[var(--bg-secondary)]
+                      "
+                    >
+                      <ExternalLink size={15} />
+                      Open
+                    </a>
+                  )}
+
                   <button
                     onClick={() =>
-                      handleNavigation(`/projects/${project.id}/edit`)
+                      handleNavigation(
+                        `/projects/${project.slug || project.id}/edit`
+                      )
                     }
                     className="
                       rounded-xl

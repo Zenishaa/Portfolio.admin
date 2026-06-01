@@ -2,10 +2,20 @@ import {
   Calendar,
   ExternalLink,
   GitBranch,
+  ImageIcon,
   Pencil,
   Star,
   Trash2,
 } from "lucide-react";
+
+import {
+  useState,
+} from "react";
+
+type CardAction = {
+  href?: string | null;
+  onClick?: () => void;
+};
 
 function PortfolioItemCard({
   title,
@@ -13,23 +23,78 @@ function PortfolioItemCard({
   featured,
   status,
   tags,
-  dateLabel = "May 2026",
-  showCodeAction = true,
-  showExternalAction = true,
-  showEditAction = true,
-  showDeleteAction = true,
+  thumbnail,
+  dateLabel,
+  metaLabel,
+  codeAction,
+  externalAction,
+  editAction,
+  deleteAction,
 }: {
   title: string;
-  description: string;
+  description?: string | null;
   featured?: boolean;
-  status: string;
+  status?: string | null;
   tags: string[];
+  thumbnail?: string | null;
   dateLabel?: string;
-  showCodeAction?: boolean;
-  showExternalAction?: boolean;
-  showEditAction?: boolean;
-  showDeleteAction?: boolean;
+  metaLabel?: string | null;
+  codeAction?: CardAction;
+  externalAction?: CardAction;
+  editAction?: CardAction;
+  deleteAction?: CardAction;
 }) {
+  const [
+    imageFailed,
+    setImageFailed,
+  ] = useState(false);
+
+  const hasActions =
+    codeAction ||
+    externalAction ||
+    editAction ||
+    deleteAction;
+
+  const renderAction = (
+    action: CardAction,
+    label: string,
+    icon: React.ReactNode,
+    danger = false
+  ) => {
+    const className = `
+      rounded-xl
+      border
+      ${danger ? "border-red-200 text-red-500 hover:bg-red-50" : "border-[var(--border-color)] hover:bg-[var(--bg-secondary)]"}
+      p-2
+      transition-all
+      duration-300
+    `;
+
+    if (action.href) {
+      return (
+        <a
+          href={action.href}
+          target="_blank"
+          rel="noreferrer"
+          className={className}
+          aria-label={label}
+        >
+          {icon}
+        </a>
+      );
+    }
+
+    return (
+      <button
+        onClick={action.onClick}
+        className={className}
+        aria-label={label}
+      >
+        {icon}
+      </button>
+    );
+  };
+
   return (
     <div
       className="
@@ -50,11 +115,43 @@ function PortfolioItemCard({
         className="
           relative
           h-52
-          bg-gradient-to-br
-          from-[var(--button-primary)]
-          to-indigo-500
+          overflow-hidden
+          bg-[var(--bg-secondary)]
         "
       >
+        {thumbnail && !imageFailed ? (
+          <img
+            src={thumbnail}
+            alt={title}
+            onError={() =>
+              setImageFailed(true)
+            }
+            className="
+              h-full
+              w-full
+              object-cover
+            "
+          />
+        ) : (
+          <div
+            className="
+              flex
+              h-full
+              w-full
+              items-center
+              justify-center
+              bg-gradient-to-br
+              from-[var(--button-primary)]
+              to-indigo-500
+            "
+          >
+            <ImageIcon
+              size={42}
+              className="text-white/80 dark:text-black/60"
+            />
+          </div>
+        )}
+
         {/* Featured */}
 
         {featured && (
@@ -84,25 +181,27 @@ function PortfolioItemCard({
 
         {/* Status */}
 
-        <div
-          className={`
-            absolute
-            right-4
-            top-4
-            rounded-full
-            px-3
-            py-1
-            text-xs
-            font-medium
-            ${
-              status === "published"
-                ? "bg-green-100 text-green-700"
-                : "bg-orange-100 text-orange-700"
-            }
-          `}
-        >
-          {status}
-        </div>
+        {status && (
+          <div
+            className={`
+              absolute
+              right-4
+              top-4
+              rounded-full
+              px-3
+              py-1
+              text-xs
+              font-medium
+              ${
+                ["published", "completed"].includes(status)
+                  ? "bg-green-100 text-green-700"
+                  : "bg-orange-100 text-orange-700"
+              }
+            `}
+          >
+            {status}
+          </div>
+        )}
 
         {/* Fake Overlay */}
 
@@ -131,46 +230,64 @@ function PortfolioItemCard({
             {title}
           </h3>
 
-          <p
-            className="
-              mt-3
-              line-clamp-3
-              text-sm
-              leading-relaxed
-              text-[var(--text-secondary)]
-            "
-          >
-            {description}
-          </p>
+          {metaLabel && (
+            <p
+              className="
+                mt-2
+                text-xs
+                font-medium
+                uppercase
+                text-[var(--text-muted)]
+              "
+            >
+              {metaLabel}
+            </p>
+          )}
+
+          {description && (
+            <p
+              className="
+                mt-3
+                line-clamp-3
+                text-sm
+                leading-relaxed
+                text-[var(--text-secondary)]
+              "
+            >
+              {description}
+            </p>
+          )}
 
         </div>
 
         {/* Tags */}
 
-        <div
-          className="
-            mt-5
-            flex
-            flex-wrap
-            gap-2
-          "
-        >
-          {tags.map((tag, index) => (
-            <div
-              key={index}
-              className="
-                rounded-full
-                bg-[var(--bg-secondary)]
-                px-3
-                py-1
-                text-xs
-                font-medium
-              "
-            >
-              {tag}
-            </div>
-          ))}
-        </div>
+        {tags.length > 0 && (
+          <div
+            className="
+              mt-5
+              flex
+              flex-wrap
+              gap-2
+            "
+          >
+            {tags.map((tag) => (
+              <div
+                key={tag}
+                className="
+                  rounded-full
+                  bg-[var(--bg-secondary)]
+                  px-3
+                  py-1
+                  text-xs
+                  font-medium
+                "
+              >
+                {tag}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Footer */}
 
@@ -187,94 +304,58 @@ function PortfolioItemCard({
         >
           {/* Date */}
 
-          <div
-            className="
-              flex
-              items-center
-              gap-2
-              text-sm
-              text-[var(--text-secondary)]
-            "
-          >
-            <Calendar size={15} />
+          {dateLabel ? (
+            <div
+              className="
+                flex
+                items-center
+                gap-2
+                text-sm
+                text-[var(--text-secondary)]
+              "
+            >
+              <Calendar size={15} />
 
-            {dateLabel}
-          </div>
+              {dateLabel}
+            </div>
+          ) : (
+            <div />
+          )}
 
           {/* Actions */}
 
-          <div className="flex items-center gap-2">
+          {hasActions && (
+            <div className="flex items-center gap-2">
+              {codeAction &&
+                renderAction(
+                  codeAction,
+                  "Open source",
+                  <GitBranch size={16} />
+                )}
 
-            {showCodeAction && (
-              <button
-                className="
-                  rounded-xl
-                  border
-                  border-[var(--border-color)]
-                  p-2
-                  transition-all
-                  duration-300
-                  hover:bg-[var(--bg-secondary)]
-                "
-                aria-label="Open source"
-              >
-                <GitBranch size={16} />
-              </button>
-            )}
+              {externalAction &&
+                renderAction(
+                  externalAction,
+                  "Open link",
+                  <ExternalLink size={16} />
+                )}
 
-            {showExternalAction && (
-              <button
-                className="
-                  rounded-xl
-                  border
-                  border-[var(--border-color)]
-                  p-2
-                  transition-all
-                  duration-300
-                  hover:bg-[var(--bg-secondary)]
-                "
-                aria-label="Open link"
-              >
-                <ExternalLink size={16} />
-              </button>
-            )}
+              {editAction &&
+                renderAction(
+                  editAction,
+                  "Edit item",
+                  <Pencil size={16} />
+                )}
 
-            {showEditAction && (
-              <button
-                className="
-                  rounded-xl
-                  border
-                  border-[var(--border-color)]
-                  p-2
-                  transition-all
-                  duration-300
-                  hover:bg-[var(--bg-secondary)]
-                "
-                aria-label="Edit item"
-              >
-                <Pencil size={16} />
-              </button>
-            )}
-
-            {showDeleteAction && (
-              <button
-                className="
-                  rounded-xl
-                  border
-                  border-red-200
-                  p-2
-                  text-red-500
-                  transition-all
-                  duration-300
-                  hover:bg-red-50
-                "
-                aria-label="Delete item"
-              >
-                <Trash2 size={16} />
-              </button>
-            )}
-
-          </div>
+              {deleteAction &&
+                renderAction(
+                  deleteAction,
+                  "Delete item",
+                  <Trash2 size={16} />,
+                  true
+                )}
+            </div>
+          )}
         </div>
       </div>
     </div>
