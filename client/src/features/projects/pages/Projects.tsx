@@ -5,6 +5,7 @@ import {
   GitBranch,
   LayoutList,
   Plus,
+  Star,
 } from "lucide-react";
 
 import {
@@ -19,7 +20,7 @@ import { usePageNavigation } from "@shared/hooks/usePageNavigation";
 import PageLoader from "@shared/components/ui/PageLoader";
 import api from "@shared/lib/api";
 import { toast } from "react-hot-toast";
-import { deleteProject } from "@features/projects/services/project.service";
+import { deleteProject, updateProject } from "@features/projects/services/project.service";
 
 interface Project {
   id: number;
@@ -297,6 +298,31 @@ function Projects() {
       toast.error("Failed to delete project");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleToggleFeatured = async (project: Project) => {
+    const slug = project.slug || String(project.id);
+    const newFeatured = !project.featured;
+    
+    // Optimistic update
+    setProjects(projects.map(p => p.id === project.id ? { ...p, featured: newFeatured } : p));
+    
+    try {
+      const formData = new FormData();
+      formData.append("featured", String(newFeatured));
+      
+      const res = await updateProject(slug, formData);
+      if (res?.success) {
+        toast.success(`Project ${newFeatured ? "featured" : "unfeatured"} successfully`);
+      } else {
+        throw new Error();
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update featured status");
+      // Revert on error
+      setProjects(projects.map(p => p.id === project.id ? { ...p, featured: project.featured } : p));
     }
   };
 
@@ -623,6 +649,7 @@ function Projects() {
               deleteAction={{
                 onClick: () => setProjectToDelete(project),
               }}
+              onToggleFeatured={() => handleToggleFeatured(project)}
             />
           ))}
         </div>
@@ -676,6 +703,9 @@ function Projects() {
                   {project.featured && (
                     <div
                       className="
+                        flex
+                        items-center
+                        gap-1
                         rounded-full
                         bg-yellow-100
                         px-3
@@ -685,9 +715,40 @@ function Projects() {
                         text-yellow-700
                       "
                     >
+                      <Star size={13} />
                       Featured
                     </div>
                   )}
+
+                  <button
+                    onClick={() => handleToggleFeatured(project)}
+                    title={project.featured ? "Unfeature Project" : "Feature Project"}
+                    className={`
+                      relative
+                      h-6
+                      w-11
+                      shrink-0
+                      rounded-full
+                      transition-all
+                      duration-300
+                      ${project.featured ? "bg-[var(--button-primary)]" : "bg-gray-300 dark:bg-gray-700"}
+                    `}
+                  >
+                    <div
+                      className={`
+                        absolute
+                        top-1
+                        h-4
+                        w-4
+                        rounded-full
+                        bg-white
+                        shadow-sm
+                        transition-all
+                        duration-300
+                        ${project.featured ? "left-[26px]" : "left-1"}
+                      `}
+                    />
+                  </button>
                 </div>
 
                 <div

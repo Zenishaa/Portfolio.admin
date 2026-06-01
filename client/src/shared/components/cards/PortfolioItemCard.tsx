@@ -30,6 +30,7 @@ function PortfolioItemCard({
   externalAction,
   editAction,
   deleteAction,
+  onToggleFeatured,
 }: {
   title: string;
   description?: string | null;
@@ -43,6 +44,7 @@ function PortfolioItemCard({
   externalAction?: CardAction;
   editAction?: CardAction;
   deleteAction?: CardAction;
+  onToggleFeatured?: (e: React.MouseEvent) => void;
 }) {
   const [
     imageFailed,
@@ -221,14 +223,48 @@ function PortfolioItemCard({
 
         <div>
 
-          <h3
-            className="
-              text-xl
-              font-semibold
-            "
-          >
-            {title}
-          </h3>
+          <div className="flex items-start justify-between gap-4">
+            <h3
+              className="
+                text-xl
+                font-semibold
+              "
+            >
+              {title}
+            </h3>
+
+            {onToggleFeatured && (
+              <button
+                onClick={onToggleFeatured}
+                title={featured ? "Unfeature Project" : "Feature Project"}
+                className={`
+                  relative
+                  h-6
+                  w-11
+                  shrink-0
+                  rounded-full
+                  transition-all
+                  duration-300
+                  ${featured ? "bg-[var(--button-primary)]" : "bg-gray-300 dark:bg-gray-700"}
+                `}
+              >
+                <div
+                  className={`
+                    absolute
+                    top-1
+                    h-4
+                    w-4
+                    rounded-full
+                    bg-white
+                    shadow-sm
+                    transition-all
+                    duration-300
+                    ${featured ? "left-[26px]" : "left-1"}
+                  `}
+                />
+              </button>
+            )}
+          </div>
 
           {metaLabel && (
             <p
