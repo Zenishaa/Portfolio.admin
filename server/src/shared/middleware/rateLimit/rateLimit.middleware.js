@@ -34,24 +34,24 @@ export const apiLimiter =
     },
   });
 
-// export const authLimiter =
-//   rateLimit({
+export const authLimiter =
+  rateLimit({
 
-//     store:
-//       new RedisStore({
-//         sendCommand:
-//           (...args) =>
-//             redis.sendCommand(args),
-//       }),
+    store:
+      new RedisStore({
+        sendCommand:
+          (...args) =>
+            redis.sendCommand(args),
+      }),
 
-//     windowMs:
-//       15 * 60 * 1000,
+    windowMs:
+      15 * 60 * 1000,
 
-//     max: 1000,
+    max: 1000,
 
-//     message: {
-//       success: false,
-//       message:
-//         "Too many login attempts",
-//     },
-//   });
+    message: {
+      success: false,
+      message:
+        "Too many login attempts",
+    },
+  });
