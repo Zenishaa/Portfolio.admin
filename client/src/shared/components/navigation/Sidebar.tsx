@@ -1,11 +1,11 @@
 import {
-  BarChart3,
   BriefcaseBusiness,
-  FileText,
   FolderKanban,
   LayoutDashboard,
   LogOut,
-  Settings,
+  Code,
+  User,
+  Award,
 } from "lucide-react";
 
 import {
@@ -16,8 +16,6 @@ import {
 import SidebarItem from "./SidebarItem";
 
 import PageLoader from "@shared/components/ui/PageLoader";
-
-import { usePageNavigation } from "@shared/hooks/usePageNavigation";
 import { useState } from "react";
 
 function Sidebar({
@@ -26,39 +24,38 @@ function Sidebar({
   sidebarOpen: boolean;
 }) {
   const location = useLocation();
-  const { loading, } = usePageNavigation();
 
   const navigate =
-  useNavigate();
+    useNavigate();
 
   const [
-  logoutLoading,
-  setLogoutLoading, ] = useState(false);
+    logoutLoading,
+    setLogoutLoading,] = useState(false);
 
   const handleLogout =
-  () => {
+    () => {
 
-    setLogoutLoading(true);
+      setLogoutLoading(true);
 
-    setTimeout(() => {
+      setTimeout(() => {
 
-      localStorage.clear();
+        localStorage.clear();
 
-      navigate(
-        "/login",
-        {
-          replace: true,
-        }
-      );
+        navigate(
+          "/login",
+          {
+            replace: true,
+          }
+        );
 
-    }, 400);
-  };
+      }, 400);
+    };
 
   return (
     <>
-    {( loading || logoutLoading ) && <PageLoader />}
-    <aside
-      className={`
+      {logoutLoading && <PageLoader />}
+      <aside
+        className={`
         hidden
         border-r
         border-[var(--border-color)]
@@ -67,19 +64,18 @@ function Sidebar({
         duration-300
         lg:flex
         lg:flex-col
-        ${
-          sidebarOpen
+        ${sidebarOpen
             ? "w-72"
             : "w-24"
-        }
+          }
       `}
-    >
-      {/* =========================
+      >
+        {/* =========================
           LOGO
       ========================= */}
 
-      <div
-        className="
+        <div
+          className="
           flex
           h-16
           items-center
@@ -87,9 +83,9 @@ function Sidebar({
           border-[var(--border-color)]
           px-6
         "
-      >
-        <div
-          className="
+        >
+          <div
+            className="
             flex
             h-11
             w-11
@@ -102,121 +98,121 @@ function Sidebar({
             text-white
             dark:text-black
           "
-        >
-          P
-        </div>
+          >
+            P
+          </div>
 
-        {sidebarOpen && (
-          <div className="ml-3">
+          {sidebarOpen && (
+            <div className="ml-3">
 
-            <h1 className="font-semibold">
-              Portfolio Admin
-            </h1>
+              <h1 className="font-semibold">
+                Portfolio Admin
+              </h1>
 
-            <p
-              className="
+              <p
+                className="
                 text-xs
                 text-[var(--text-secondary)]
               "
-            >
-              Developer Platform
-            </p>
+              >
+                Developer Platform
+              </p>
 
-          </div>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
 
-      {/* =========================
+        {/* =========================
           NAVIGATION
       ========================= */}
 
-      <div className="flex-1 p-4">
+        <div className="flex-1 p-4">
 
-        <div className="space-y-2">
+          <div className="space-y-2">
 
-          <SidebarItem
-            icon={<LayoutDashboard size={20} />}
-            label="Dashboard"
-            path="/dashboard"
-            active={
-              location.pathname ===
-              "/dashboard"
-            }
-            sidebarOpen={sidebarOpen}
-          />
+            <SidebarItem
+              icon={<LayoutDashboard size={20} />}
+              label="Dashboard"
+              path="/dashboard"
+              active={
+                location.pathname ===
+                "/dashboard"
+              }
+              sidebarOpen={sidebarOpen}
+            />
 
-          <SidebarItem
-            icon={<FolderKanban size={20} />}
-            label="Projects"
-            path="/projects"
-            active={
-              location.pathname ===
-              "/projects"
-            }
-            sidebarOpen={sidebarOpen}
-          />
+            <SidebarItem
+              icon={<FolderKanban size={20} />}
+              label="Projects"
+              path="/projects"
+              active={
+                location.pathname ===
+                "/projects"
+              }
+              sidebarOpen={sidebarOpen}
+            />
 
-          <SidebarItem
-            icon={<FileText size={20} />}
-            label="Research Papers"
-            path="/research"
-            active={
-              location.pathname ===
-              "/research"
-            }
-            sidebarOpen={sidebarOpen}
-          />
+            <SidebarItem
+              icon={<BriefcaseBusiness size={20} />}
+              label="Experience"
+              path="/experience"
+              active={
+                location.pathname ===
+                "/experience"
+              }
+              sidebarOpen={sidebarOpen}
+            />
 
-          <SidebarItem
-            icon={<BriefcaseBusiness size={20} />}
-            label="Experience"
-            path="/experience"
-            active={
-              location.pathname ===
-              "/experience"
-            }
-            sidebarOpen={sidebarOpen}
-          />
+            <SidebarItem
+              icon={<Award size={20} />}
+              label="Certificates"
+              path="/certificates"
+              active={
+                location.pathname ===
+                "/certificates"
+              }
+              sidebarOpen={sidebarOpen}
+            />
 
-          <SidebarItem
-            icon={<BarChart3 size={20} />}
-            label="Analytics"
-            path="/analytics"
-            active={
-              location.pathname ===
-              "/analytics"
-            }
-            sidebarOpen={sidebarOpen}
-          />
+            <SidebarItem
+              icon={<Code size={20} />}
+              label="Public APIs"
+              path="/public-apis"
+              active={
+                location.pathname ===
+                "/public-apis"
+              }
+              sidebarOpen={sidebarOpen}
+            />
 
-          <SidebarItem
-            icon={<Settings size={20} />}
-            label="Settings"
-            path="/settings"
-            active={
-              location.pathname ===
-              "/settings"
-            }
-            sidebarOpen={sidebarOpen}
-          />
+            <SidebarItem
+              icon={<User size={20} />}
+              label="Profile"
+              path="/profile"
+              active={
+                location.pathname ===
+                "/profile"
+              }
+              sidebarOpen={sidebarOpen}
+            />
 
+          </div>
         </div>
-      </div>
 
-      {/* =========================
+        {/* =========================
           BOTTOM
       ========================= */}
 
-      <div
-        className="
+        <div
+          className="
           border-t
           border-[var(--border-color)]
           p-4
         "
-      >
-        <button
-          onClick={handleLogout}
-          className="
+        >
+          <button
+            onClick={handleLogout}
+            className="
             flex
             w-full
             items-center
@@ -228,23 +224,23 @@ function Sidebar({
             hover:bg-red-500/10
             hover:text-red-500
           "
-        >
+          >
 
-          <LogOut size={20} />
+            <LogOut size={20} />
 
-          {sidebarOpen && (
+            {sidebarOpen && (
 
-            <span className="ml-3">
+              <span className="ml-3">
 
-              Logout
+                Logout
 
-            </span>
+              </span>
 
-          )}
+            )}
 
-        </button>
-      </div>
-    </aside>
+          </button>
+        </div>
+      </aside>
     </>
   );
 }

@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
-import PageLoader from "@shared/components/ui/PageLoader";
-
-import { usePageNavigation } from "@shared/hooks/usePageNavigation";
+import { useNavigate } from "react-router-dom";
 
 function SidebarItem({
   icon,
@@ -17,18 +15,13 @@ function SidebarItem({
   sidebarOpen: boolean;
   path: string;
 }) {
-  const {
-    loading,
-    handleNavigation,
-  } = usePageNavigation();
+  const navigate = useNavigate();
 
   return (
     <>
-      {loading && <PageLoader />}
-
       <button
         onClick={() =>
-          handleNavigation(path)
+          navigate(path)
         }
         className={`
           flex

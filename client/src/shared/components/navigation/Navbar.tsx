@@ -13,8 +13,6 @@ import {
   type FormEvent,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import PageLoader from "@shared/components/ui/PageLoader";
-import { usePageNavigation } from "@shared/hooks/usePageNavigation";
 
 function Navbar({
   sidebarOpen,
@@ -26,7 +24,6 @@ function Navbar({
   ) => void;
 }) {
   const { theme, setTheme } = useTheme();
-  const { loading } = usePageNavigation();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,8 +55,6 @@ function Navbar({
   };
 
   return (
-    <>
-    {loading && <PageLoader />}
     <header
       className="
         sticky
@@ -277,7 +272,6 @@ function Navbar({
         </div>
       </div>
     </header>
-    </>
   );
 }
 

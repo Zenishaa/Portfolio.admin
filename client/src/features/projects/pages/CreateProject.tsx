@@ -24,6 +24,14 @@ import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from "@layouts/DashboardLayout";
 
+const LINK_OPTIONS = [
+  { value: "github", label: "GitHub" },
+  { value: "live", label: "Live Demo" },
+  { value: "figma", label: "Figma" },
+  { value: "youtube", label: "YouTube" },
+  { value: "docs", label: "Documentation" },
+];
+
 const createSlug = (
   value: string
 ) =>
@@ -891,7 +899,10 @@ const handleSubmit = async (
                   (
                     link,
                     index
-                  ) => (
+                  ) => {
+                    const selectedKeys = links.map(l => l.key);
+                    
+                    return (
                     <div
                       key={index}
                       className="
@@ -933,25 +944,19 @@ const handleSubmit = async (
                             outline-none
                           "
                         >
-                          <option value="github">
-                            GitHub
+                          <option value="">
+                            Select
                           </option>
-
-                          <option value="live">
-                            Live Demo
-                          </option>
-
-                          <option value="figma">
-                            Figma
-                          </option>
-
-                          <option value="youtube">
-                            YouTube
-                          </option>
-
-                          <option value="docs">
-                            Documentation
-                          </option>
+                          {LINK_OPTIONS.map((opt) => {
+                            const isUsed = selectedKeys.includes(opt.value);
+                            const isThis = link.key === opt.value;
+                            if (isUsed && !isThis) return null;
+                            return (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            );
+                          })}
                         </select>
 
                       </div>
@@ -1038,7 +1043,7 @@ const handleSubmit = async (
 
                     </div>
                   )
-                )}
+                })}
 
               </div>
 

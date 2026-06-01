@@ -16,7 +16,7 @@ import {
 
 import DashboardLayout from "@layouts/DashboardLayout";
 import PortfolioItemCard from "@shared/components/cards/PortfolioItemCard";
-import { usePageNavigation } from "@shared/hooks/usePageNavigation";
+import { useNavigate } from "react-router-dom";
 import PageLoader from "@shared/components/ui/PageLoader";
 import api from "@shared/lib/api";
 import { toast } from "react-hot-toast";
@@ -54,7 +54,7 @@ const PROJECT_STATUSES = ["ongoing", "completed"] as const;
 type TypeFilter = "all" | "research" | "project";
 
 function Projects() {
-  const { handleNavigation } = usePageNavigation();
+  const navigate = useNavigate();
 
   /* =========================
       VIEW MODE
@@ -393,7 +393,7 @@ function Projects() {
         {/* Right */}
 
         <button
-          onClick={() => handleNavigation("/projects/create")}
+          onClick={() => navigate("/projects/create")}
           className="
             flex
             items-center
@@ -642,7 +642,7 @@ function Projects() {
               }
               editAction={{
                 onClick: () =>
-                  handleNavigation(
+                  navigate(
                     `/projects/${project.slug || project.id}/edit`
                   ),
               }}
@@ -932,7 +932,7 @@ function Projects() {
 
                   <button
                     onClick={() =>
-                      handleNavigation(
+                      navigate(
                         `/projects/${project.slug || project.id}/edit`
                       )
                     }

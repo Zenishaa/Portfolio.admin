@@ -12,6 +12,8 @@ import AuthCallback from "@features/auth/pages/AuthCallback";
 
 import Dashboard from "@features/dashboard/pages/Dashboard";
 
+import Profile from "@features/profile/pages/Profile";
+
 import Projects from "@features/projects/pages/Projects";
 
 import CreateProject from "@features/projects/pages/CreateProject";
@@ -58,6 +60,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
