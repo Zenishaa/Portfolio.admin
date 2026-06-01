@@ -10,7 +10,7 @@ import {
 } from "react";
 
 import DashboardLayout from "@layouts/DashboardLayout";
-import ProjectCard from "@features/projects/components/cards/ProjectCard";
+import PortfolioItemCard from "@shared/components/cards/PortfolioItemCard";
 import { usePageNavigation } from "@shared/hooks/usePageNavigation";
 import PageLoader from "@shared/components/ui/PageLoader";
 import api from "@shared/lib/api";
@@ -271,7 +271,7 @@ function Projects() {
           "
         >
           {filteredProjects.map((project) => (
-            <ProjectCard
+            <PortfolioItemCard
               key={project.id}
               title={project.title}
               description={project.description}

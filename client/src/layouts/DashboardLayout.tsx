@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import Navbar from "@features/dashboard/components/Navbar";
-import Sidebar from "@features/dashboard/components/Sidebar";
+import Navbar from "@shared/components/navigation/Navbar";
+import Sidebar from "@shared/components/navigation/Sidebar";
 
 function DashboardLayout({
   children,

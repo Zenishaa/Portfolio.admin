@@ -22,6 +22,15 @@ src/
   assets/       Static source assets
 ```
 
+Shared UI is grouped by purpose:
+
+```text
+shared/components/
+  cards/        Reusable dashboard/content cards
+  navigation/   Dashboard shell navigation
+  ui/           Small generic UI primitives
+```
+
 Path aliases are configured in `tsconfig.app.json` and `vite.config.ts`:
 
 ```text

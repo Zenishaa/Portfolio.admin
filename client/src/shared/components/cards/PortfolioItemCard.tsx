@@ -7,18 +7,28 @@ import {
   Trash2,
 } from "lucide-react";
 
-function ProjectCard({
+function PortfolioItemCard({
   title,
   description,
   featured,
   status,
   tags,
+  dateLabel = "May 2026",
+  showCodeAction = true,
+  showExternalAction = true,
+  showEditAction = true,
+  showDeleteAction = true,
 }: {
   title: string;
   description: string;
   featured?: boolean;
   status: string;
   tags: string[];
+  dateLabel?: string;
+  showCodeAction?: boolean;
+  showExternalAction?: boolean;
+  showEditAction?: boolean;
+  showDeleteAction?: boolean;
 }) {
   return (
     <div
@@ -188,69 +198,81 @@ function ProjectCard({
           >
             <Calendar size={15} />
 
-            May 2026
+            {dateLabel}
           </div>
 
           {/* Actions */}
 
           <div className="flex items-center gap-2">
 
-            <button
-              className="
-                rounded-xl
-                border
-                border-[var(--border-color)]
-                p-2
-                transition-all
-                duration-300
-                hover:bg-[var(--bg-secondary)]
-              "
-            >
-              <GitBranch size={16} />
-            </button>
+            {showCodeAction && (
+              <button
+                className="
+                  rounded-xl
+                  border
+                  border-[var(--border-color)]
+                  p-2
+                  transition-all
+                  duration-300
+                  hover:bg-[var(--bg-secondary)]
+                "
+                aria-label="Open source"
+              >
+                <GitBranch size={16} />
+              </button>
+            )}
 
-            <button
-              className="
-                rounded-xl
-                border
-                border-[var(--border-color)]
-                p-2
-                transition-all
-                duration-300
-                hover:bg-[var(--bg-secondary)]
-              "
-            >
-              <ExternalLink size={16} />
-            </button>
+            {showExternalAction && (
+              <button
+                className="
+                  rounded-xl
+                  border
+                  border-[var(--border-color)]
+                  p-2
+                  transition-all
+                  duration-300
+                  hover:bg-[var(--bg-secondary)]
+                "
+                aria-label="Open link"
+              >
+                <ExternalLink size={16} />
+              </button>
+            )}
 
-            <button
-              className="
-                rounded-xl
-                border
-                border-[var(--border-color)]
-                p-2
-                transition-all
-                duration-300
-                hover:bg-[var(--bg-secondary)]
-              "
-            >
-              <Pencil size={16} />
-            </button>
+            {showEditAction && (
+              <button
+                className="
+                  rounded-xl
+                  border
+                  border-[var(--border-color)]
+                  p-2
+                  transition-all
+                  duration-300
+                  hover:bg-[var(--bg-secondary)]
+                "
+                aria-label="Edit item"
+              >
+                <Pencil size={16} />
+              </button>
+            )}
 
-            <button
-              className="
-                rounded-xl
-                border
-                border-red-200
-                p-2
-                text-red-500
-                transition-all
-                duration-300
-                hover:bg-red-50
-              "
-            >
-              <Trash2 size={16} />
-            </button>
+            {showDeleteAction && (
+              <button
+                className="
+                  rounded-xl
+                  border
+                  border-red-200
+                  p-2
+                  text-red-500
+                  transition-all
+                  duration-300
+                  hover:bg-red-50
+                "
+                aria-label="Delete item"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
 
           </div>
         </div>
@@ -259,4 +281,4 @@ function ProjectCard({
   );
 }
 
-export default ProjectCard;
+export default PortfolioItemCard;

@@ -10,7 +10,7 @@ import {
 
 import DashboardLayout from "@layouts/DashboardLayout";
 
-import StatCard from "@features/dashboard/components/cards/StatCard";
+import StatCard from "@shared/components/cards/StatCard";
 
 const popularProjects = [
   {
