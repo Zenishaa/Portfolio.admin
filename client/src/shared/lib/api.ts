@@ -50,7 +50,7 @@ api.interceptors.response.use(
 
     // Check if error is 401 (Unauthorized) and the request hasn't been retried yet
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      
+
       if (isRefreshing) {
         // If a refresh is already in progress, put this request in a queue to wait
         return new Promise(function (resolve, reject) {
@@ -96,14 +96,16 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // Reject all queued requests
         processQueue(refreshError, null);
-        
+
+        console.log("Refresh token expired", refreshError);
+
         // Log the user out completely since the refresh token is dead
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("userName");
         localStorage.removeItem("userAvatar");
         window.location.href = "/login?error=session_expired";
-        
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

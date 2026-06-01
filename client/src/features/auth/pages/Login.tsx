@@ -6,11 +6,13 @@ import {
 
 import { useTheme } from "next-themes";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
 
 import PageLoader from "@shared/components/ui/PageLoader";
+
+import api from "@shared/lib/api";
 
 function Login() {
   const { theme, setTheme } = useTheme();
@@ -19,6 +21,23 @@ function Login() {
 
   const [loading, setLoading] =
     useState(false);
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      api
+        .get("/api/user/me")
+        .then(() => {
+          navigate("/dashboard", { replace: true });
+        })
+        .catch(() => {
+          // Token invalid, stay on login
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+        });
+    }
+  }, []);
 
   const handleNavigation = (
     path: string
