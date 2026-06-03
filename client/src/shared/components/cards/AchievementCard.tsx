@@ -115,6 +115,9 @@ function AchievementCard({
         <div
           className="
             mt-5
+            border-t
+            border-[var(--border-color)]
+            pt-5
             flex
             flex-wrap
             items-end
