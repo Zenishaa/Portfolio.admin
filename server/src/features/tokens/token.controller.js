@@ -39,65 +39,51 @@ export const refreshAccessToken =
         });
       }
 
-      jwt.verify(
+      try {
+        const decoded = jwt.verify(
+          refreshToken,
+          process.env.JWT_REFRESH_SECRET
+        );
 
-        refreshToken,
+        // Refresh Token Rotation
+        // 1. Delete the old token
+        await prisma.refreshToken.delete({
+          where: {
+            id: storedToken.id,
+          },
+        });
 
-        process.env
-          .JWT_REFRESH_SECRET,
+        // 2. Generate new tokens
+        const accessToken = generateAccessToken(decoded.userId);
+        const newRefreshToken = generateRefreshToken(decoded.userId);
 
-        async (
-          error,
-          decoded
-        ) => {
+        // 3. Save new refresh token to DB
+        await prisma.refreshToken.create({
+          data: {
+            user_id: decoded.userId,
+            token: newRefreshToken,
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          },
+        });
 
-          if (error) {
-            return res.status(401).json({
-              success: false,
-              message:
-                "Refresh token expired",
-            });
-          }
+        // 4. Set new HttpOnly cookie
+        res.cookie("refreshToken", newRefreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        });
 
-          // Refresh Token Rotation
-          // 1. Delete the old token
-          await prisma.refreshToken.delete({
-            where: {
-              id: storedToken.id,
-            },
-          });
-
-          // 2. Generate new tokens
-          const accessToken =
-            generateAccessToken(
-              decoded.userId
-            );
-
-          const newRefreshToken = generateRefreshToken(decoded.userId);
-
-          // 3. Save new refresh token to DB
-          await prisma.refreshToken.create({
-            data: {
-              user_id: decoded.userId,
-              token: newRefreshToken,
-              expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
-          });
-
-          // 4. Set new HttpOnly cookie
-          res.cookie("refreshToken", newRefreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-          });
-
-          return res.status(200).json({
-            success: true,
-            accessToken,
-          });
-        }
-      );
+        return res.status(200).json({
+          success: true,
+          accessToken,
+        });
+      } catch (error) {
+        return res.status(401).json({
+          success: false,
+          message: "Refresh token expired or invalid",
+        });
+      }
 
     } catch (error) {
 
