@@ -638,10 +638,10 @@ export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
     if (refreshToken) {
-      // Optional: Delete from DB
-      await prisma.refreshToken.deleteMany({
+      // Delete from DB in the background (fire-and-forget)
+      prisma.refreshToken.deleteMany({
         where: { token: refreshToken },
-      });
+      }).catch((err) => console.error("Background DB deletion failed during logout:", err));
     }
     
     res.clearCookie("refreshToken", {
