@@ -15,8 +15,7 @@ import {
 
 import SidebarItem from "./SidebarItem";
 
-import PageLoader from "@shared/components/ui/PageLoader";
-import { useState } from "react";
+
 
 function Sidebar({
   sidebarOpen,
@@ -28,32 +27,8 @@ function Sidebar({
   const navigate =
     useNavigate();
 
-  const [
-    logoutLoading,
-    setLogoutLoading,] = useState(false);
-
-  const handleLogout =
-    () => {
-
-      setLogoutLoading(true);
-
-      setTimeout(() => {
-
-        localStorage.clear();
-
-        navigate(
-          "/login",
-          {
-            replace: true,
-          }
-        );
-
-      }, 400);
-    };
-
   return (
     <>
-      {logoutLoading && <PageLoader />}
       <aside
         className={`
         hidden
@@ -211,7 +186,7 @@ function Sidebar({
         "
         >
           <button
-            onClick={handleLogout}
+            onClick={() => navigate("/logout")}
             className="
             flex
             w-full

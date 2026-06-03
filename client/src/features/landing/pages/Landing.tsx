@@ -35,9 +35,8 @@ function App() {
           navigate("/dashboard", { replace: true });
         })
         .catch(() => {
-          // Token invalid, stay on landing
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
+          // Token invalid, clear everything via global route
+          navigate("/logout");
         });
     }
   }, []);

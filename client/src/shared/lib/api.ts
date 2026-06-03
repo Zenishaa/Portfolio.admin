@@ -100,12 +100,8 @@ api.interceptors.response.use(
 
         console.log("Refresh token expired", refreshError);
 
-        // Log the user out completely since the refresh token is dead
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("userName");
-        localStorage.removeItem("userAvatar");
-        window.location.href = "/login?error=session_expired";
+        // Delegate to the global logout route
+        window.location.href = "/logout?error=Session expired";
 
         return Promise.reject(refreshError);
       } finally {
