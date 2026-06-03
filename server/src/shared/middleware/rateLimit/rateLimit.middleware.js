@@ -4,6 +4,18 @@ import { redis } from "../../../config/redis.js";
 import jwt from "jsonwebtoken";
 
 /**
+ * Helper to get the real client IP, even behind a proxy/load balancer.
+ * Prevents all users from sharing the same IP when deployed via Docker/Render.
+ */
+const getClientIp = (req) => {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+  return req.ip;
+};
+
+/**
  * Extracts user ID from the Authorization header (JWT) if present.
  * Falls back to IP address for unauthenticated requests.
  * This ensures rate limits are per-user, not per-IP.
@@ -21,8 +33,8 @@ const getUserKey = (req) => {
   } catch {
     // Token invalid/expired — fall through to IP-based key
   }
-  // Fallback: use IP (supports proxied requests)
-  return `ip:${req.ip}`;
+  // Fallback: use true client IP
+  return `ip:${getClientIp(req)}`;
 };
 
 /**
@@ -64,8 +76,8 @@ export const authLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  // Auth endpoints: always IP-based since no JWT exists yet
-  keyGenerator: (req) => `auth:${req.ip}`,
+  // Auth endpoints: always IP-based since no JWT exists yet, using true client IP
+  keyGenerator: (req) => `auth:${getClientIp(req)}`,
   handler: (req, res) => {
     const retryAfter = res.getHeader("Retry-After");
     const message = "Too many login attempts. Please try again after 15 minutes.";
