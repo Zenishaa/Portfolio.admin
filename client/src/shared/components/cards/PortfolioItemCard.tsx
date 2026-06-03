@@ -2,7 +2,6 @@ import {
   Calendar,
   ExternalLink,
   GitBranch,
-  ImageIcon,
   Pencil,
   Star,
   Trash2,
@@ -147,41 +146,12 @@ function PortfolioItemCard({
               to-indigo-500
             "
           >
-            <ImageIcon
+            {/* <ImageIcon
               size={42}
               className="text-white/80 dark:text-black/60"
-            />
+            /> */}
           </div>
         )}
-
-        {/* Featured */}
-
-        {featured && (
-          <div
-            className="
-              absolute
-              left-4
-              top-4
-              flex
-              items-center
-              gap-1
-              rounded-full
-              bg-white/90
-              px-3
-              py-1
-              text-xs
-              font-medium
-              text-black
-              backdrop-blur
-            "
-          >
-            <Star size={13} />
-
-            Featured
-          </div>
-        )}
-
-        {/* Status */}
 
         {status && (
           <div
@@ -224,61 +194,69 @@ function PortfolioItemCard({
         <div>
 
           <div className="flex items-start justify-between gap-4">
-            <h3
-              className="
-                text-xl
-                font-semibold
-              "
-            >
-              {title}
-            </h3>
+            <div className="min-w-0">
+              <h3
+                className="
+                  text-xl
+                  font-semibold
+                "
+              >
+                {title}
+              </h3>
+
+              {metaLabel && (
+                <p
+                  className="
+                    mt-2
+                    text-xs
+                    font-medium
+                    uppercase
+                    text-[var(--text-muted)]
+                  "
+                >
+                  {metaLabel}
+                </p>
+              )}
+            </div>
 
             {onToggleFeatured && (
               <button
                 onClick={onToggleFeatured}
-                title={featured ? "Unfeature Project" : "Feature Project"}
+                aria-label={
+                  featured
+                    ? "Unfeature Project"
+                    : "Feature Project"
+                }
+                title={
+                  featured
+                    ? "Unfeature Project"
+                    : "Feature Project"
+                }
                 className={`
-                  relative
-                  h-6
-                  w-11
+                  flex
+                  h-10
+                  w-10
                   shrink-0
-                  rounded-full
+                  items-center
+                  justify-center
+                  rounded-xl
+                  border
                   transition-all
                   duration-300
-                  ${featured ? "bg-[var(--button-primary)]" : "bg-gray-300 dark:bg-gray-700"}
+                  ${
+                    featured
+                      ? "border-amber-200 bg-amber-50 text-amber-500 hover:bg-amber-100"
+                      : "border-[var(--border-color)] text-gray-400 hover:bg-[var(--bg-secondary)]"
+                  }
                 `}
               >
-                <div
-                  className={`
-                    absolute
-                    top-1
-                    h-4
-                    w-4
-                    rounded-full
-                    bg-white
-                    shadow-sm
-                    transition-all
-                    duration-300
-                    ${featured ? "left-[26px]" : "left-1"}
-                  `}
+                <Star
+                  size={16}
+                  fill={featured ? "currentColor" : "none"}
                 />
               </button>
             )}
           </div>
-
-          {metaLabel && (
-            <p
-              className="
-                mt-2
-                text-xs
-                font-medium
-                uppercase
-                text-[var(--text-muted)]
-              "
-            >
-              {metaLabel}
-            </p>
-          )}
 
           {description && (
             <p
@@ -331,11 +309,10 @@ function PortfolioItemCard({
           className="
             mt-6
             flex
+            flex-wrap
             items-center
             justify-between
-            border-t
-            border-[var(--border-color)]
-            pt-5
+            gap-4
           "
         >
           {/* Date */}
@@ -352,11 +329,11 @@ function PortfolioItemCard({
             >
               <Calendar size={15} />
 
-              {dateLabel}
-            </div>
-          ) : (
-            <div />
-          )}
+                {dateLabel}
+              </div>
+            ) : (
+              <div />
+            )}
 
           {/* Actions */}
 

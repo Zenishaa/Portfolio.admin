@@ -491,11 +491,10 @@ function EditCertificate() {
           >
             <div>
               <label className="mb-2 block text-sm font-medium">
-                Title *
+                Title
               </label>
 
               <input
-                required
                 type="text"
                 value={title}
                 onChange={(event) => {
@@ -530,7 +529,7 @@ function EditCertificate() {
 
             <div className="mt-6">
               <label className="mb-2 block text-sm font-medium">
-                Type *
+                Type
               </label>
 
               <select

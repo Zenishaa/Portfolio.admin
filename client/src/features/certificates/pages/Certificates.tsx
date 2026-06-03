@@ -5,6 +5,7 @@ import {
   LayoutList,
   Pencil,
   Plus,
+  Star,
   Trash2,
 } from "lucide-react";
 
@@ -145,46 +146,65 @@ function Certificates() {
       ]
     );
 
-  const getCertificateImage = (
+  const getCertificateCoverImage = (
     certificate: Certificate
   ) => {
-    const images =
-      certificate.images;
+    const images = certificate.images;
 
     if (!images) {
       return "";
     }
 
-    if (
-      Array.isArray(images)
-    ) {
-      return typeof images[0] ===
-        "string"
-        ? images[0]
-        : "";
+    const resolveImageUrl = (
+      value: unknown
+    ) => {
+      if (
+        typeof value === "string" &&
+        value.trim()
+      ) {
+        return value.trim();
+      }
+
+      if (
+        value &&
+        typeof value === "object"
+      ) {
+        const imageRecord = value as {
+          secure_url?: string;
+          url?: string;
+          src?: string;
+        };
+
+        return (
+          imageRecord.secure_url ||
+          imageRecord.url ||
+          imageRecord.src ||
+          ""
+        );
+      }
+
+      return "";
+    };
+
+    if (Array.isArray(images)) {
+      return resolveImageUrl(images[0]);
     }
 
-    if (
-      typeof images === "string"
-    ) {
+    if (typeof images === "string") {
       try {
-        const parsed =
-          JSON.parse(images);
+        const parsed = JSON.parse(images);
 
-        if (
-          Array.isArray(parsed)
-        ) {
-          return typeof parsed[0] ===
-            "string"
-            ? parsed[0]
-            : "";
+        if (Array.isArray(parsed)) {
+          return resolveImageUrl(parsed[0]);
         }
+
+        return resolveImageUrl(parsed);
       } catch {
-        return images;
+        return resolveImageUrl(images);
       }
     }
 
-    return "";
+    return resolveImageUrl(images);
   };
 
   const formatDate = (
@@ -559,7 +579,7 @@ function Certificates() {
                     item.link ||
                     undefined
                   }
-                  image={getCertificateImage(
+                  image={getCertificateCoverImage(
                     item
                   )}
                   isVisible={isVisibleCertificate(
@@ -612,152 +632,166 @@ function Certificates() {
                   "
                 >
                   <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-3">
-                      {getCertificateImage(
-                        item
-                      ) && (
-                        <img
-                          src={getCertificateImage(
-                            item
-                          )}
-                          alt={item.title}
-                          className="
-                            h-14
-                            w-14
-                            rounded-2xl
-                            object-cover
-                          "
-                        />
-                      )}
-
-                      <h2 className="text-xl font-semibold">
-                        {item.title}
-                      </h2>
-
-                      <div
-                        className={`
-                          rounded-full
-                          px-3
-                          py-1
-                          text-xs
-                          font-medium
-                          ${
-                            item.type ===
-                            "certificate"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-amber-100 text-amber-700"
-                          }
-                        `}
-                      >
-                        {formatTypeLabel(
-                          item.type
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
+                        {getCertificateCoverImage(
+                          item
+                        ) && (
+                          <img
+                            src={getCertificateCoverImage(
+                              item
+                            )}
+                            alt={item.title}
+                            className="
+                              h-14
+                              w-14
+                              rounded-2xl
+                              object-cover
+                            "
+                          />
                         )}
+
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <h2 className="text-xl font-semibold">
+                              {item.title}
+                            </h2>
+
+                            <div
+                              className={`
+                                rounded-full
+                                px-3
+                                py-1
+                                text-xs
+                                font-medium
+                                ${
+                                  item.type ===
+                                  "certificate"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-amber-100 text-amber-700"
+                                }
+                              `}
+                            >
+                              {formatTypeLabel(
+                                item.type
+                              )}
+                            </div>
+                          </div>
+
+                          <div
+                            className="
+                              mt-3
+                              flex
+                              flex-wrap
+                              items-center
+                              gap-3
+                              text-xs
+                              font-medium
+                              uppercase
+                              text-[var(--text-muted)]
+                            "
+                          >
+                            <span>
+                              {item.issued_by ||
+                                "N/A"}
+                            </span>
+                          </div>
+
+                          <p
+                            className="
+                              mt-3
+                              max-w-3xl
+                              text-sm
+                              leading-relaxed
+                              text-[var(--text-secondary)]
+                            "
+                          >
+                            {isVisibleCertificate(
+                              item
+                            )
+                              ? "Visible on public portfolio."
+                              : "Hidden from public portfolio."}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div
-                      className="
-                        mt-3
-                        flex
-                        flex-wrap
-                        items-center
-                        gap-3
-                        text-xs
-                        font-medium
-                        uppercase
-                        text-[var(--text-muted)]
-                      "
-                    >
-                      <span>
-                        {item.issued_by ||
-                          "N/A"}
-                      </span>
-
-                      <span className="flex items-center gap-1">
-                        <Calendar size={13} />
-                        {formatDate(
-                          item.issue_date
-                        )}
-                      </span>
-                    </div>
-
-                    <p
-                      className="
-                        mt-3
-                        max-w-3xl
-                        text-sm
-                        leading-relaxed
-                        text-[var(--text-secondary)]
-                      "
-                    >
-                      {isVisibleCertificate(
-                        item
-                      )
-                        ? "Visible on public portfolio."
-                        : "Hidden from public portfolio."}
-                    </p>
-                  </div>
-
-                  <div
-                    className="
-                      flex
-                      flex-col
-                      items-start
-                      gap-4
-                      lg:items-end
-                    "
-                  >
-                    <button
-                      onClick={() =>
-                        void handleToggleVisibility(
-                          item
-                        )
-                      }
-                      title={
-                        isVisibleCertificate(
-                          item
-                        )
-                          ? "Hide from portfolio"
-                          : "Show on portfolio"
-                      }
-                      className={`
-                        relative
-                        h-6
-                        w-11
-                        shrink-0
-                        rounded-full
-                        transition-all
-                        duration-300
-                        ${
+                      <button
+                        onClick={() =>
+                          void handleToggleVisibility(
+                            item
+                          )
+                        }
+                        aria-label={
                           isVisibleCertificate(
                             item
                           )
-                            ? "bg-[var(--button-primary)]"
-                            : "bg-gray-300 dark:bg-gray-700"
+                            ? "Hide from portfolio"
+                            : "Show on portfolio"
                         }
-                      `}
-                    >
-                      <div
+                        title={
+                          isVisibleCertificate(
+                            item
+                          )
+                            ? "Hide from portfolio"
+                            : "Show on portfolio"
+                        }
                         className={`
-                          absolute
-                          top-1
-                          h-4
-                          w-4
-                          rounded-full
-                          bg-white
-                          shadow-sm
+                          flex
+                          h-10
+                          w-10
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-xl
+                          border
                           transition-all
                           duration-300
                           ${
                             isVisibleCertificate(
                               item
                             )
-                              ? "left-[26px]"
-                              : "left-1"
+                              ? "border-amber-200 bg-amber-50 text-amber-500 hover:bg-amber-100"
+                              : "border-[var(--border-color)] text-gray-400 hover:bg-[var(--bg-secondary)]"
                           }
                         `}
-                      />
-                    </button>
+                      >
+                        <Star
+                          size={16}
+                          fill={
+                            isVisibleCertificate(
+                              item
+                            )
+                              ? "currentColor"
+                              : "none"
+                          }
+                        />
+                      </button>
+                    </div>
+
+                  <div
+                    className="
+                      mt-5
+                      flex
+                      flex-wrap
+                      items-end
+                      justify-between
+                      gap-4
+                    "
+                  >
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        text-sm
+                        text-[var(--text-secondary)]
+                      "
+                    >
+                      <Calendar size={15} />
+                      {formatDate(
+                        item.issue_date
+                      )}
+                    </div>
 
                     <div className="flex flex-wrap gap-3">
                       {item.link && (
@@ -840,6 +874,7 @@ function Certificates() {
                       </button>
                     </div>
                   </div>
+                </div>
                 </div>
               )
             )}

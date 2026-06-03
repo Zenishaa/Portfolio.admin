@@ -74,25 +74,13 @@ function AchievementCard({
       </div>
 
       <div className="p-6">
-        <h3 className="text-xl font-semibold">{title}</h3>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h3 className="text-xl font-semibold">{title}</h3>
 
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
-          Issued by: {issuedBy || "N/A"}
-        </p>
-
-        <div
-          className="
-            mt-4
-            flex
-            items-center
-            justify-between
-            text-sm
-            text-[var(--text-secondary)]
-          "
-        >
-          <div className="flex items-center gap-2">
-            <Calendar size={15} />
-            {issueDate || "No date"}
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">
+              Issued by: {issuedBy || "N/A"}
+            </p>
           </div>
 
           <button
@@ -126,15 +114,21 @@ function AchievementCard({
 
         <div
           className="
-            mt-6
+            mt-5
             flex
-            items-center
-            justify-end
-            border-t
-            border-[var(--border-color)]
-            pt-5
+            flex-wrap
+            items-end
+            justify-between
+            gap-4
+            text-sm
+            text-[var(--text-secondary)]
           "
         >
+          <div className="flex items-center gap-2">
+            <Calendar size={15} />
+            {issueDate || "No date"}
+          </div>
+
           <div className="flex items-center gap-2">
             {link && (
               <a
