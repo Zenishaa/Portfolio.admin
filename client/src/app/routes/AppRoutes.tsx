@@ -8,6 +8,8 @@ import Landing from "@features/landing/pages/Landing";
 
 import Login from "@features/auth/pages/Login";
 
+import Logout from "@features/auth/pages/Logout";
+
 import AuthCallback from "@features/auth/pages/AuthCallback";
 
 import Dashboard from "@features/dashboard/pages/Dashboard";
@@ -42,6 +44,11 @@ function AppRoutes() {
         <Route
           path="/login"
           element={<Login />}
+        />
+
+        <Route
+          path="/logout"
+          element={<Logout />}
         />
 
         <Route

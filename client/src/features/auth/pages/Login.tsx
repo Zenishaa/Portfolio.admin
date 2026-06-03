@@ -47,9 +47,8 @@ function Login() {
           navigate("/dashboard", { replace: true });
         })
         .catch(() => {
-          // Token invalid, stay on login
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
+          // Token invalid, clear everything via global route
+          navigate("/logout");
         });
     }
   }, []);
