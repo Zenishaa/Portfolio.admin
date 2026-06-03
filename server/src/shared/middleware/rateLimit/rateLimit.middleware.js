@@ -66,11 +66,22 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
   // Auth endpoints: always IP-based since no JWT exists yet
   keyGenerator: (req) => `auth:${req.ip}`,
-  handler: (_req, res) => {
+  handler: (req, res) => {
+    const retryAfter = res.getHeader("Retry-After");
+    const message = "Too many login attempts. Please try again after 15 minutes.";
+
+    // If it's a direct browser navigation (OAuth entry), redirect back to frontend
+    if (req.path.includes("github")) {
+      const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+      const params = new URLSearchParams({ error: message, retryAfter });
+      return res.redirect(`${clientUrl}/login?${params.toString()}`);
+    }
+
+    // Otherwise return standard JSON for API calls
     res.status(429).json({
       success: false,
-      message: "Too many login attempts. Please try again after 15 minutes.",
-      retryAfter: res.getHeader("Retry-After"),
+      message,
+      retryAfter,
     });
   },
 });

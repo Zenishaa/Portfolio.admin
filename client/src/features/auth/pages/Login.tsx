@@ -8,7 +8,8 @@ import { useTheme } from "next-themes";
 
 import { useState, useEffect } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 import PageLoader from "@shared/components/ui/PageLoader";
 
@@ -19,8 +20,22 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Handle URL errors (e.g. rate limits or OAuth failures)
+  useEffect(() => {
+    const errorMsg = searchParams.get("error");
+    if (errorMsg) {
+      toast.error(errorMsg, {
+        id: "auth-error",
+        duration: 5000,
+      });
+      // Remove error from URL so it doesn't trigger again on refresh
+      searchParams.delete("error");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Check if user is already authenticated
   useEffect(() => {
