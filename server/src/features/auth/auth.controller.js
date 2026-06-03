@@ -600,18 +600,23 @@ export const githubCallback =
         );
 
       /* =====================
-          REDIRECT
+          REDIRECT (Via Cookies)
       ===================== */
 
-      const params =
-        new URLSearchParams({
-          accessToken,
+      // Set temporary cookies that the frontend AuthCallback will read and delete.
+      // Not HttpOnly so the frontend JS can extract them to localStorage.
+      const cookieOptions = {
+        httpOnly: false,
+        secure: getServerUrl().startsWith("https://"),
+        sameSite: "lax",
+        maxAge: 60 * 1000, // 60 seconds
+      };
 
-          refreshToken,
-        });
+      res.cookie("temp_access_token", accessToken, cookieOptions);
+      res.cookie("temp_refresh_token", refreshToken, cookieOptions);
 
       return res.redirect(
-        `${getClientUrl()}/auth/github/callback?${params.toString()}`
+        `${getClientUrl()}/auth/github/callback`
       );
 
     } catch (error) {

@@ -4,6 +4,7 @@ import axios, {
   type AxiosResponse,
   type AxiosError,
 } from "axios";
+import { toast } from "react-hot-toast";
 
 const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -110,6 +111,21 @@ api.interceptors.response.use(
       } finally {
         isRefreshing = false;
       }
+    }
+
+    // Handle rate limiting (429) — show toast with server message
+    if (error.response?.status === 429) {
+      const retryAfter = error.response.headers["retry-after"];
+      const message =
+        (error.response.data as any)?.message ||
+        `Too many requests. ${retryAfter ? `Try again in ${retryAfter}s.` : "Please slow down."}`;
+
+      toast.error(message, {
+        id: "rate-limit-toast",
+        duration: 5000,
+      });
+
+      error.message = message;
     }
 
     return Promise.reject(error);

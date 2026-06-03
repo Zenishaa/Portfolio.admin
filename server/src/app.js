@@ -7,6 +7,7 @@ import path from "path";
 
 import {
   apiLimiter,
+  writeLimiter,
 } from "./shared/middleware/rateLimit/rateLimit.middleware.js";
 
 import {
@@ -56,6 +57,7 @@ app.use(
 );
 
 app.use(apiLimiter);
+app.use(writeLimiter);
 
 app.use(apiGateway);
 
