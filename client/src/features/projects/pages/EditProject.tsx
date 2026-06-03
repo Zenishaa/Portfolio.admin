@@ -602,7 +602,7 @@ function EditProject() {
                   font-medium
                 "
               >
-                Project Title *
+                Project Title
               </label>
 
               <input
@@ -654,7 +654,7 @@ function EditProject() {
                   font-medium
                 "
               >
-                Description *
+                Description
               </label>
 
               <textarea
@@ -913,7 +913,7 @@ function EditProject() {
                     font-medium
                   "
                 >
-                  Project Links *
+                  Project Links
                 </label>
 
                 <button
@@ -1233,7 +1233,7 @@ function EditProject() {
                   font-medium
                 "
               >
-                Type *
+                Type
               </label>
 
               <select
@@ -1299,7 +1299,7 @@ function EditProject() {
                   font-medium
                 "
               >
-                Status *
+                Status
               </label>
 
               <select

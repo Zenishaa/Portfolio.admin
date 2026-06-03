@@ -568,7 +568,7 @@ const handleSubmit = async (
                   font-medium
                 "
               >
-                Project Title *
+                Project Title
               </label>
 
               <input
@@ -607,7 +607,7 @@ const handleSubmit = async (
                   font-medium
                 "
               >
-                Description *
+                Description
               </label>
 
               <textarea
@@ -866,7 +866,7 @@ const handleSubmit = async (
                     font-medium
                   "
                 >
-                  Project Links *
+                  Project Links
                 </label>
 
                 <button
@@ -1073,7 +1073,7 @@ const handleSubmit = async (
                 font-semibold
               "
             >
-              Thumbnail *
+              Thumbnail
             </h2>
 
             <input
@@ -1186,7 +1186,7 @@ const handleSubmit = async (
                   font-medium
                 "
               >
-                Type *
+                Type
               </label>
 
               <select
@@ -1252,7 +1252,7 @@ const handleSubmit = async (
                   font-medium
                 "
               >
-                Status *
+                Status
               </label>
 
               <select

@@ -681,234 +681,233 @@ function Projects() {
                 lg:justify-between
               "
             >
-              {/* LEFT */}
-
               <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-3">
-                  {getProjectThumbnail(project) && (
-                    <img
-                      src={getProjectThumbnail(project)}
-                      alt={project.title}
-                      className="
-                        h-14
-                        w-14
-                        rounded-2xl
-                        object-cover
-                      "
-                    />
-                  )}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    {getProjectThumbnail(project) && (
+                      <img
+                        src={getProjectThumbnail(project)}
+                        alt={project.title}
+                        className="
+                          h-14
+                          w-14
+                          rounded-2xl
+                          object-cover
+                        "
+                      />
+                    )}
 
-                  <h2 className="text-xl font-semibold">{project.title}</h2>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h2 className="text-xl font-semibold">
+                          {project.title}
+                        </h2>
 
-                  {project.featured && (
-                    <div
-                      className="
-                        flex
-                        items-center
-                        gap-1
-                        rounded-full
-                        bg-yellow-100
-                        px-3
-                        py-1
-                        text-xs
-                        font-medium
-                        text-yellow-700
-                      "
-                    >
-                      <Star size={13} />
-                      Featured
+                        <div
+                          className={`
+                            rounded-full
+                            px-3
+                            py-1
+                            text-xs
+                            font-medium
+                            ${
+                              ["published", "completed"].includes(
+                                project.status || ""
+                              )
+                                ? "bg-green-100 text-green-700"
+                                : "bg-orange-100 text-orange-700"
+                            }
+                          `}
+                        >
+                          {formatStatus(project.status)}
+                        </div>
+
+                        {(project.type || "").toLowerCase() === "research" && project.publisher && (
+                          <div className="rounded-full bg-[var(--bg-secondary)] px-3 py-1 text-xs font-medium uppercase text-[var(--text-muted)]">
+                            {project.publisher}
+                          </div>
+                        )}
+                      </div>
+
+                      <div
+                        className="
+                          mt-3
+                          flex
+                          flex-wrap
+                          items-center
+                          gap-3
+                          text-xs
+                          font-medium
+                          uppercase
+                          text-[var(--text-muted)]
+                        "
+                      >
+                        {project.type && (
+                          <span>
+                            {formatLabel(project.type)}
+                          </span>
+                        )}
+                      </div>
+
+                      <p
+                        className="
+                          mt-3
+                          max-w-3xl
+                          text-sm
+                          leading-relaxed
+                          text-[var(--text-secondary)]
+                        "
+                      >
+                        {project.description ||
+                          "No description added."}
+                      </p>
+
+                      {getProjectContributors(project).length > 0 && (
+                        <p
+                          className="
+                            mt-3
+                            text-sm
+                            text-[var(--text-secondary)]
+                          "
+                        >
+                          Contributors:{" "}
+                          {getProjectContributors(project).join(", ")}
+                        </p>
+                      )}
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {getProjectTags(project).map((tag) => (
+                          <div
+                            key={tag}
+                            className="
+                              rounded-full
+                              bg-[var(--bg-secondary)]
+                              px-3
+                              py-1
+                              text-xs
+                              font-medium
+                            "
+                          >
+                            {tag}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  )}
+                  </div>
 
                   <button
                     onClick={() => handleToggleFeatured(project)}
+                    aria-label={project.featured ? "Unfeature Project" : "Feature Project"}
                     title={project.featured ? "Unfeature Project" : "Feature Project"}
                     className={`
-                      relative
-                      h-6
-                      w-11
+                      flex
+                      h-10
+                      w-10
                       shrink-0
-                      rounded-full
+                      items-center
+                      justify-center
+                      rounded-xl
+                      border
                       transition-all
                       duration-300
-                      ${project.featured ? "bg-[var(--button-primary)]" : "bg-gray-300 dark:bg-gray-700"}
+                      ${
+                        project.featured
+                          ? "border-amber-200 bg-amber-50 text-amber-500 hover:bg-amber-100"
+                          : "border-[var(--border-color)] text-gray-400 hover:bg-[var(--bg-secondary)]"
+                      }
                     `}
                   >
-                    <div
-                      className={`
-                        absolute
-                        top-1
-                        h-4
-                        w-4
-                        rounded-full
-                        bg-white
-                        shadow-sm
-                        transition-all
-                        duration-300
-                        ${project.featured ? "left-[26px]" : "left-1"}
-                      `}
+                    <Star
+                      size={16}
+                      fill={project.featured ? "currentColor" : "none"}
                     />
                   </button>
                 </div>
 
                 <div
                   className="
-                    mt-3
+                    mt-5
                     flex
                     flex-wrap
-                    items-center
-                    gap-3
-                    text-xs
-                    font-medium
-                    uppercase
-                    text-[var(--text-muted)]
+                    items-end
+                    justify-between
+                    gap-4
                   "
                 >
-                  {project.type && (
-                    <span>
-                      {formatLabel(project.type)}
-                    </span>
-                  )}
-
-                  {(project.type || "").toLowerCase() === "research" && project.publisher && (
-                    <span>
-                      {project.publisher}
-                    </span>
-                  )}
-
-                  {(project.date_time ||
-                    project.created_at) && (
-                    <span
-                      className="
-                        flex
-                        items-center
-                        gap-1
-                      "
-                    >
-                      <Calendar size={13} />
-                      {formatDate(
-                        project.date_time
-                      ) ||
-                        formatDate(
-                          project.created_at
-                        )}
-                    </span>
-                  )}
-                </div>
-
-                {/* DESCRIPTION */}
-
-                <p
-                  className="
-                    mt-3
-                    max-w-3xl
-                    text-sm
-                    leading-relaxed
-                    text-[var(--text-secondary)]
-                  "
-                >
-                  {project.description ||
-                    "No description added."}
-                </p>
-
-                {/* TAGS */}
-
-                {getProjectContributors(project).length > 0 && (
-                  <p
+                  <div
                     className="
-                      mt-3
+                      flex
+                      items-center
+                      gap-2
                       text-sm
                       text-[var(--text-secondary)]
                     "
                   >
-                    Contributors:{" "}
-                    {getProjectContributors(project).join(", ")}
-                  </p>
-                )}
+                    <Calendar size={15} />
+                    {formatDate(project.date_time) ||
+                      formatDate(project.created_at) ||
+                      "No date"}
+                  </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {getProjectTags(project).map((tag) => (
-                    <div
-                      key={tag}
-                      className="
-                        rounded-full
-                        bg-[var(--bg-secondary)]
-                        px-3
-                        py-1
-                        text-xs
-                        font-medium
-                      "
-                    >
-                      {tag}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                  <div className="flex flex-wrap gap-3">
+                    {getProjectLink(project, ["github"]) && (
+                      <a
+                        href={getProjectLink(project, ["github"])}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          rounded-xl
+                          border
+                          border-[var(--border-color)]
+                          px-4
+                          py-2
+                          text-sm
+                          font-medium
+                          transition-all
+                          duration-300
+                          hover:bg-[var(--bg-secondary)]
+                        "
+                      >
+                        <GitBranch size={15} />
+                        GitHub
+                      </a>
+                    )}
 
-              {/* RIGHT */}
+                    {getProjectLink(project, ["live", "figma", "youtube", "docs"]) && (
+                      <a
+                        href={getProjectLink(project, ["live", "figma", "youtube", "docs"])}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          rounded-xl
+                          border
+                          border-[var(--border-color)]
+                          px-4
+                          py-2
+                          text-sm
+                          font-medium
+                          transition-all
+                          duration-300
+                          hover:bg-[var(--bg-secondary)]
+                        "
+                      >
+                        <ExternalLink size={15} />
+                        Open
+                      </a>
+                    )}
 
-              <div
-                className="
-                  flex
-                  flex-col
-                  items-start
-                  gap-4
-                  lg:items-end
-                "
-              >
-                {/* STATUS */}
-
-                <div
-                  className={`
-                    rounded-full
-                    px-4
-                    py-2
-                    text-sm
-                    font-medium
-                    ${
-                      ["published", "completed"].includes(project.status || "")
-                        ? "bg-green-100 text-green-700"
-                        : "bg-orange-100 text-orange-700"
-                    }
-                  `}
-                >
-                  {formatStatus(project.status)}
-                </div>
-
-                {/* ACTIONS */}
-
-                <div className="flex flex-wrap gap-3">
-                  {getProjectLink(project, ["github"]) && (
-                    <a
-                      href={getProjectLink(project, ["github"])}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="
-                        flex
-                        items-center
-                        gap-2
-                        rounded-xl
-                        border
-                        border-[var(--border-color)]
-                        px-4
-                        py-2
-                        text-sm
-                        font-medium
-                        transition-all
-                        duration-300
-                        hover:bg-[var(--bg-secondary)]
-                      "
-                    >
-                      <GitBranch size={15} />
-                      GitHub
-                    </a>
-                  )}
-
-                  {getProjectLink(project, ["live", "figma", "youtube", "docs"]) && (
-                    <a
-                      href={getProjectLink(project, ["live", "figma", "youtube", "docs"])}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/projects/${project.slug || project.id}/edit`
+                        )
+                      }
                       className="
                         flex
                         items-center
@@ -925,51 +924,31 @@ function Projects() {
                         hover:bg-[var(--bg-secondary)]
                       "
                     >
-                      <ExternalLink size={15} />
-                      Open
-                    </a>
-                  )}
+                      <span>Edit</span>
+                    </button>
 
-                  <button
-                    onClick={() =>
-                      navigate(
-                        `/projects/${project.slug || project.id}/edit`
-                      )
-                    }
-                    className="
-                      rounded-xl
-                      border
-                      border-[var(--border-color)]
-                      px-4
-                      py-2
-                      text-sm
-                      font-medium
-                      transition-all
-                      duration-300
-                      hover:bg-[var(--bg-secondary)]
-                    "
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => setProjectToDelete(project)}
-                    className="
-                      rounded-xl
-                      border
-                      border-red-200
-                      px-4
-                      py-2
-                      text-sm
-                      font-medium
-                      text-red-500
-                      transition-all
-                      duration-300
-                      hover:bg-red-50
-                    "
-                  >
-                    Delete
-                  </button>
+                    <button
+                      onClick={() => setProjectToDelete(project)}
+                      className="
+                        flex
+                        items-center
+                        gap-2
+                        rounded-xl
+                        border
+                        border-red-200
+                        px-4
+                        py-2
+                        text-sm
+                        font-medium
+                        text-red-500
+                        transition-all
+                        duration-300
+                        hover:bg-red-50
+                      "
+                    >
+                      <span>Delete</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
