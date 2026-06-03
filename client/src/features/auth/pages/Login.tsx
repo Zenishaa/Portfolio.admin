@@ -13,7 +13,7 @@ import { toast } from "react-hot-toast";
 
 import PageLoader from "@shared/components/ui/PageLoader";
 
-import api from "@shared/lib/api";
+import { verifySession } from "@shared/lib/auth";
 
 function Login() {
   const { theme, setTheme } = useTheme();
@@ -39,18 +39,11 @@ function Login() {
 
   // Check if user is already authenticated
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      api
-        .get("/api/user/me")
-        .then(() => {
-          navigate("/dashboard", { replace: true });
-        })
-        .catch(() => {
-          // Token invalid, clear everything via global route
-          navigate("/logout");
-        });
-    }
+    verifySession().then((isValid) => {
+      if (isValid) {
+        navigate("/dashboard", { replace: true });
+      }
+    });
   }, []);
 
   const handleNavigation = (

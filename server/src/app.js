@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
+import cookieParser from "cookie-parser";
 
 import {
   apiLimiter,
@@ -55,6 +56,8 @@ app.use(
     limit: "10mb",
   })
 );
+
+app.use(cookieParser());
 
 app.use(apiLimiter);
 app.use(writeLimiter);

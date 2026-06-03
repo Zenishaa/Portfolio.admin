@@ -3,6 +3,7 @@ import express from "express";
 import {
   githubLogin,
   githubCallback,
+  logout,
 } from "./auth.controller.js";
 
 import {
@@ -21,6 +22,11 @@ router.get(
   "/github/callback",
   authLimiter,
   githubCallback
+);
+
+router.post(
+  "/logout",
+  logout
 );
 
 export default router;

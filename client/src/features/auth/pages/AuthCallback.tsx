@@ -27,11 +27,6 @@ function AuthCallback() {
         "accessToken"
       );
 
-    const refreshToken =
-      params.get(
-        "refreshToken"
-      );
-
     /*
     ====================
     GITHUB SUCCESS
@@ -39,9 +34,8 @@ function AuthCallback() {
     */
 
     const handleGithubSuccess = async () => {
-      if (accessToken && refreshToken) {
+      if (accessToken) {
         localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
 
         try {
           const res = await api.get("/api/user/me", {
@@ -62,7 +56,7 @@ function AuthCallback() {
       }
     };
 
-    if (accessToken && refreshToken) {
+    if (accessToken) {
       handleGithubSuccess();
       return;
     }
@@ -78,14 +72,8 @@ function AuthCallback() {
         "accessToken"
       );
 
-    const storedRefreshToken =
-      localStorage.getItem(
-        "refreshToken"
-      );
-
     if (
-      storedAccessToken &&
-      storedRefreshToken
+      storedAccessToken
     ) {
 
       navigate(

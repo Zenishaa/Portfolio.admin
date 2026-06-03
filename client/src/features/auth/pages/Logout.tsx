@@ -1,17 +1,25 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PageLoader from "@shared/components/ui/PageLoader";
+import api from "@shared/lib/api";
 
 function Logout() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Show loader briefly for smooth transition, then clear auth & redirect
-    const timer = setTimeout(() => {
-      // Clear specific auth items from local storage
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
+    const performLogout = async () => {
+      try {
+        // Call backend to invalidate HttpOnly cookie and remove from DB
+        await api.post("/api/auth/logout", {}, { withCredentials: true });
+      } catch (err) {
+        console.error("Failed to logout from backend", err);
+      }
+
+      // Show loader briefly for smooth transition, then clear auth & redirect
+      const timer = setTimeout(() => {
+        // Clear specific auth items from local storage
+        localStorage.removeItem("accessToken");
       localStorage.removeItem("userName");
       localStorage.removeItem("userAvatar");
       
@@ -24,11 +32,14 @@ function Logout() {
         document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
       });
       
-      const queryString = searchParams.toString();
-      navigate(`/login${queryString ? `?${queryString}` : ""}`, { replace: true });
-    }, 400);
+        const queryString = searchParams.toString();
+        navigate(`/login${queryString ? `?${queryString}` : ""}`, { replace: true });
+      }, 400);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    };
+
+    performLogout();
   }, [navigate, searchParams]);
 
   return <PageLoader />;

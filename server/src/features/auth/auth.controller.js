@@ -603,11 +603,17 @@ export const githubCallback =
           REDIRECT
       ===================== */
 
+      // Set HttpOnly cookie for the refresh token
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Secure in prod (requires HTTPS)
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
       const params =
         new URLSearchParams({
           accessToken,
-
-          refreshToken,
         });
 
       return res.redirect(
@@ -619,7 +625,34 @@ export const githubCallback =
 
       return redirectWithError(
         res,
-        "GitHub login failed"
+        "Failed to authenticate with GitHub"
       );
     }
   };
+
+/* =========================================
+    LOGOUT
+========================================= */
+
+export const logout = async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.refreshToken;
+    if (refreshToken) {
+      // Optional: Delete from DB
+      await prisma.refreshToken.deleteMany({
+        where: { token: refreshToken },
+      });
+    }
+    
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error during logout" });
+  }
+};

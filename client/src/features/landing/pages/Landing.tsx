@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 
 import PageLoader from "@shared/components/ui/PageLoader";
 
-import api from "@shared/lib/api";
+import { verifySession } from "@shared/lib/auth";
 
 function App() {
   const { theme, setTheme } = useTheme();
@@ -27,18 +27,11 @@ function App() {
 
   // Check if user is already authenticated
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      api
-        .get("/api/user/me")
-        .then(() => {
-          navigate("/dashboard", { replace: true });
-        })
-        .catch(() => {
-          // Token invalid, clear everything via global route
-          navigate("/logout");
-        });
-    }
+    verifySession().then((isValid) => {
+      if (isValid) {
+        navigate("/dashboard", { replace: true });
+      }
+    });
   }, []);
 
   const handleNavigation = (path: string) => {
