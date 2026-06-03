@@ -10,32 +10,27 @@ from "@shared/components/ui/PageLoader";
 
 import api from "@shared/lib/api";
 
-// Helper to get cookie value by name
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-  return null;
-};
-
-// Helper to delete a cookie
-const deleteCookie = (name: string) => {
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-};
-
 function AuthCallback() {
 
   const navigate =
     useNavigate();
 
   useEffect(() => {
-    // Extract tokens securely from temporary cookies
-    const accessToken = getCookie("temp_access_token");
-    const refreshToken = getCookie("temp_refresh_token");
 
-    // Immediately clear the cookies for security
-    if (accessToken) deleteCookie("temp_access_token");
-    if (refreshToken) deleteCookie("temp_refresh_token");
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const accessToken =
+      params.get(
+        "accessToken"
+      );
+
+    const refreshToken =
+      params.get(
+        "refreshToken"
+      );
 
     /*
     ====================
