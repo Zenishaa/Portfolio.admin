@@ -22,6 +22,12 @@ import CreateProject from "@features/projects/pages/CreateProject";
 
 import EditProject from "@features/projects/pages/EditProject";
 
+import Certificates from "@features/certificates/pages/Certificates";
+
+import CreateCertificate from "@features/certificates/pages/CreateCertificate";
+
+import EditCertificate from "@features/certificates/pages/EditCertificate";
+
 import ProtectedRoute from "@app/routes/ProtectedRoute";
 
 import NotFound from "@app/pages/NotFound";
@@ -108,12 +114,38 @@ function AppRoutes() {
         />
 
         <Route
+          path="/certificates"
+          element={
+            <ProtectedRoute>
+              <Certificates />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/certificates/create"
+          element={
+            <ProtectedRoute>
+              <CreateCertificate />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/certificates/:slug/edit"
+          element={
+            <ProtectedRoute>
+              <EditCertificate />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="*"
           element={<NotFound />}
         />
 
       </Routes>
-
     </BrowserRouter>
   );
 }

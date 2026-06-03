@@ -1,11 +1,11 @@
 import {
+  Award,
   BriefcaseBusiness,
+  Code,
   FolderKanban,
   LayoutDashboard,
   LogOut,
-  Code,
   User,
-  Award,
 } from "lucide-react";
 
 import {
@@ -142,10 +142,7 @@ function Sidebar({
               icon={<Award size={20} />}
               label="Certificates"
               path="/certificates"
-              active={
-                location.pathname ===
-                "/certificates"
-              }
+              active={location.pathname.startsWith("/certificates")}
               sidebarOpen={sidebarOpen}
             />
 
