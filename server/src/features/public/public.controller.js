@@ -58,10 +58,10 @@ export const getPublicPortfolio = async (
           username: true,
           avatar: true,
           bio: true,
+          headline: true,
+
           users_links: true,
           skills: true,
-
-          hero: true,
 
           projects: {
             orderBy: {

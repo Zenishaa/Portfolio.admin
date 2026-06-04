@@ -1,11 +1,10 @@
 import {
   Award,
   BriefcaseBusiness,
-  Code,
   FolderKanban,
   LayoutDashboard,
   LogOut,
-  User,
+  Key,
 } from "lucide-react";
 
 import {
@@ -147,17 +146,14 @@ function Sidebar({
             />
 
             <SidebarItem
-              icon={<Code size={20} />}
-              label="Public APIs"
-              path="/public-apis"
-              active={
-                location.pathname ===
-                "/public-apis"
-              }
+              icon={<Key size={20} />}
+              label="API Keys"
+              path="/api-keys"
+              active={location.pathname.startsWith("/api-keys")}
               sidebarOpen={sidebarOpen}
             />
 
-            <SidebarItem
+            {/* <SidebarItem
               icon={<User size={20} />}
               label="Profile"
               path="/profile"
@@ -166,7 +162,7 @@ function Sidebar({
                 "/profile"
               }
               sidebarOpen={sidebarOpen}
-            />
+            /> */}
 
           </div>
         </div>

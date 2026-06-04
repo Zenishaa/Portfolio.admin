@@ -2,6 +2,8 @@ import cloudinary from "../../config/cloudinary.js";
 import crypto from "crypto";
 
 import { prisma } from "../../config/db.js";
+import { redis } from "../../config/redis.js";
+import { getClientIp } from "../../shared/middleware/rateLimit/rateLimit.middleware.js";
 
 import {
   generateAccessToken,
@@ -637,12 +639,37 @@ export const githubCallback =
 export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
+    const ip = getClientIp(req);
+    const keysToDelete = [
+      `rl:auth:auth:${ip}`,
+      `rl:api:ip:${ip}`,
+      `rl:write:ip:${ip}`
+    ];
+
     if (refreshToken) {
+      const tokenRecord = await prisma.refreshToken.findFirst({
+        where: { token: refreshToken },
+      });
+
+      if (tokenRecord) {
+        const userId = tokenRecord.user_id;
+        keysToDelete.push(`rl:api:user:${userId}`);
+        keysToDelete.push(`rl:write:user:${userId}`);
+      }
+
       // Delete immediately — logout must invalidate the token right away.
       // A queue is not used here because Redis downtime would leave the token alive in DB.
       await prisma.refreshToken.deleteMany({
         where: { token: refreshToken },
       });
+    }
+
+    if (keysToDelete.length > 0) {
+      try {
+        await redis.del(keysToDelete);
+      } catch (redisError) {
+        console.error("Failed to clear rate limits from Redis during logout:", redisError);
+      }
     }
     
     res.clearCookie("refreshToken", {

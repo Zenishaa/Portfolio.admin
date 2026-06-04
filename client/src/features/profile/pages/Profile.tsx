@@ -147,6 +147,7 @@ function Profile() {
 
       if (profile.name) formData.append("name", profile.name);
       if (profile.bio) formData.append("bio", profile.bio);
+      if (profile.headline !== undefined) formData.append("headline", profile.headline ?? "");
       if (profile.is_public !== undefined) formData.append("is_public", String(profile.is_public));
       if (avatarFile) formData.append("avatar", avatarFile);
 
@@ -336,6 +337,37 @@ function Profile() {
                 "
               />
             </div>
+
+            {/* HEADLINE */}
+
+            <div className="mt-6">
+              <label className="mb-2 block text-sm font-medium">
+                Headline
+              </label>
+              <input
+                type="text"
+                value={profile.headline || ""}
+                onChange={(e) =>
+                  setProfile({ ...profile, headline: e.target.value })
+                }
+                placeholder="e.g. Full-Stack Developer & AI Enthusiast"
+                maxLength={255}
+                className="
+                  w-full
+                  rounded-2xl
+                  border
+                  border-[var(--border-color)]
+                  bg-[var(--bg-main)]
+                  px-4
+                  py-3
+                  outline-none
+                "
+              />
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                Short tagline shown prominently on your public portfolio.
+              </p>
+            </div>
+
 
             {/* SKILLS */}
 

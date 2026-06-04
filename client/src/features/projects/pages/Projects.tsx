@@ -18,9 +18,8 @@ import DashboardLayout from "@layouts/DashboardLayout";
 import PortfolioItemCard from "@shared/components/cards/PortfolioItemCard";
 import { useNavigate } from "react-router-dom";
 import PageLoader from "@shared/components/ui/PageLoader";
-import api from "@shared/lib/api";
 import { toast } from "react-hot-toast";
-import { deleteProject, updateProject } from "@features/projects/services/project.service";
+import { getProjects, deleteProject, updateProject } from "@features/projects/services/project.service";
 
 interface Project {
   id: number;
@@ -269,9 +268,9 @@ function Projects() {
 
   const fetchProjects = async () => {
     try {
-      const response = await api.get("/api/projects");
-      if (response.data.success) {
-        setProjects(response.data.projects);
+      const data = await getProjects();
+      if (data.success) {
+        setProjects(data.projects);
       }
     } catch (error) {
       console.error("Failed to fetch projects", error);

@@ -28,6 +28,8 @@ import CreateCertificate from "@features/certificates/pages/CreateCertificate";
 
 import EditCertificate from "@features/certificates/pages/EditCertificate";
 
+import ApiKeys from "@features/apiKeys/pages/ApiKeys";
+
 import ProtectedRoute from "@app/routes/ProtectedRoute";
 
 import NotFound from "@app/pages/NotFound";
@@ -136,6 +138,15 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <EditCertificate />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/api-keys"
+          element={
+            <ProtectedRoute>
+              <ApiKeys />
             </ProtectedRoute>
           }
         />

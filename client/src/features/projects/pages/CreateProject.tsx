@@ -593,6 +593,14 @@ const handleSubmit = async (
                 "
               />
 
+              {/* SLUG PREVIEW */}
+
+              {slug && (
+                <p className="mt-2 text-xs text-[var(--text-muted)]">
+                  Slug: {slug}
+                </p>
+              )}
+
             </div>
 
             {/* DESCRIPTION */}

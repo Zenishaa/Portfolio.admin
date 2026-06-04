@@ -14,6 +14,8 @@ export const getCurrentUser = async (req, res) => {
         email: true,
         avatar: true,
         bio: true,
+        headline: true,
+
         users_links: true,
         skills: true,
         is_public: true,
@@ -46,7 +48,16 @@ export const getCurrentUser = async (req, res) => {
 
 export const updateCurrentUser = async (req, res) => {
   try {
-    const { name, username, bio, is_public, users_links, skills } = req.body;
+    const {
+      name,
+      username,
+      bio,
+      headline,
+
+      is_public,
+      users_links,
+      skills,
+    } = req.body;
 
     let avatarUrl = undefined;
     if (req.file) {
@@ -62,10 +73,22 @@ export const updateCurrentUser = async (req, res) => {
         ...(name !== undefined && { name }),
         ...(username !== undefined && { username }),
         ...(bio !== undefined && { bio }),
+        ...(headline !== undefined && { headline }),
+
         ...(avatarUrl !== undefined && { avatar: avatarUrl }),
-        ...(is_public !== undefined && { is_public: is_public === 'true' || is_public === true }),
-        ...(users_links !== undefined && { users_links: typeof users_links === 'string' ? JSON.parse(users_links) : users_links }),
-        ...(skills !== undefined && { skills: typeof skills === 'string' ? JSON.parse(skills) : skills }),
+        ...(is_public !== undefined && {
+          is_public: is_public === "true" || is_public === true,
+        }),
+        ...(users_links !== undefined && {
+          users_links:
+            typeof users_links === "string"
+              ? JSON.parse(users_links)
+              : users_links,
+        }),
+        ...(skills !== undefined && {
+          skills:
+            typeof skills === "string" ? JSON.parse(skills) : skills,
+        }),
       },
       select: {
         id: true,
@@ -74,6 +97,8 @@ export const updateCurrentUser = async (req, res) => {
         email: true,
         avatar: true,
         bio: true,
+        headline: true,
+
         users_links: true,
         skills: true,
         is_public: true,
@@ -91,7 +116,7 @@ export const updateCurrentUser = async (req, res) => {
     console.log(error);
 
     // Prisma unique constraint violation code
-    if (error.code === 'P2002') {
+    if (error.code === "P2002") {
       return res.status(400).json({
         success: false,
         message: "Username is already taken",

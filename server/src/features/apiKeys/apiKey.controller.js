@@ -80,6 +80,21 @@ export const getApiKeys = async (
         },
       });
 
+    const currentDate = new Date();
+    
+    // Auto-deactivate expired keys
+    for (let api of apis) {
+      if (api.status === "active" && api.expires_at) {
+        if (currentDate > new Date(api.expires_at)) {
+          await prisma.aPI.update({
+            where: { id: api.id },
+            data: { status: "inactive" },
+          });
+          api.status = "inactive";
+        }
+      }
+    }
+
     return res.status(200).json({
       success: true,
       apis,

@@ -1,31 +1,15 @@
-import { useEffect }
-from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-import {
-  useNavigate,
-} from "react-router-dom";
-
-import PageLoader
-from "@shared/components/ui/PageLoader";
-
-import api from "@shared/lib/api";
+import PageLoader from "@shared/components/ui/PageLoader";
+import { getProfile } from "@features/profile/services/profile.service";
 
 function AuthCallback() {
-
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
-
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const accessToken =
-      params.get(
-        "accessToken"
-      );
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("accessToken");
 
     /*
     ====================
@@ -35,20 +19,25 @@ function AuthCallback() {
 
     const handleGithubSuccess = async () => {
       if (accessToken) {
+        // Store token first so the request interceptor picks it up automatically
         localStorage.setItem("accessToken", accessToken);
 
         try {
-          const res = await api.get("/api/user/me", {
-            headers: { Authorization: `Bearer ${accessToken}` }
-          });
-          
-          if (res.data?.success && res.data.user) {
-            localStorage.setItem("userName", res.data.user.name || res.data.user.username);
-            if (res.data.user.avatar) {
-              localStorage.setItem("userAvatar", res.data.user.avatar);
+          // The request interceptor in api.ts will attach the Authorization header
+          // automatically — no need to set it manually here.
+          const res = await getProfile();
+
+          if (res?.success && res.user) {
+            localStorage.setItem(
+              "userName",
+              res.user.name || res.user.username
+            );
+            if (res.user.avatar) {
+              localStorage.setItem("userAvatar", res.user.avatar);
             }
           }
         } catch (error) {
+          // Non-fatal: user can still access the dashboard without cached name/avatar
           console.error("Failed to fetch user details during login", error);
         }
 
@@ -67,22 +56,10 @@ function AuthCallback() {
     ====================
     */
 
-    const storedAccessToken =
-      localStorage.getItem(
-        "accessToken"
-      );
+    const storedAccessToken = localStorage.getItem("accessToken");
 
-    if (
-      storedAccessToken
-    ) {
-
-      navigate(
-        "/dashboard",
-        {
-          replace: true,
-        }
-      );
-
+    if (storedAccessToken) {
+      navigate("/dashboard", { replace: true });
       return;
     }
 
@@ -92,18 +69,10 @@ function AuthCallback() {
     ====================
     */
 
-    navigate(
-      "/login?error=github",
-      {
-        replace: true,
-      }
-    );
-
+    navigate("/login?error=github", { replace: true });
   }, [navigate]);
 
-  return (
-    <PageLoader />
-  );
+  return <PageLoader />;
 }
 
 export default AuthCallback;

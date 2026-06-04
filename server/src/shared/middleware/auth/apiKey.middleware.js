@@ -47,10 +47,16 @@ export const validateApiKey = async (
       if (
         currentDate > expiryDate
       ) {
+        // Automatically deactivate the key since it has expired
+        await prisma.aPI.update({
+          where: { id: api.id },
+          data: { status: "inactive" },
+        });
+
         return res.status(401).json({
           success: false,
           message:
-            "API key expired",
+            "API key expired and has been deactivated",
         });
       }
     }

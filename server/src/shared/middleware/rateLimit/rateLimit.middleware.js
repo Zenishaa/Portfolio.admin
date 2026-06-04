@@ -15,7 +15,7 @@ import jwt from "jsonwebtoken";
  * in your Express app so that req.ip is already resolved correctly.
  * This helper is kept as a safety net for cases where that isn't done yet.
  */
-const getClientIp = (req) => {
+export const getClientIp = (req) => {
   const forwarded = req.headers["x-forwarded-for"];
   if (forwarded) {
     return forwarded.split(",")[0].trim();
@@ -124,7 +124,7 @@ const makeStore = (prefix) =>
  * the response by the time the handler fires.
  * Falls back to a human-readable string so the JSON payload is always useful.
  */
-const getRetryAfter = (res) => res.getHeader("Retry-After") ?? "a few minutes";
+const getRetryAfter = (res) => res.getHeader("Retry-After") ?? "60 seconds";
 
 // ─────────────────────────────────────────────
 // Limiters
@@ -133,11 +133,11 @@ const getRetryAfter = (res) => res.getHeader("Retry-After") ?? "a few minutes";
 /**
  * General API rate limiter — applied globally.
  * Counts per authenticated user (userId) or per IP for anonymous requests.
- * 200 requests / 15 minutes.
+ * 200 requests / 1 minute.
  */
 export const apiLimiter = rateLimit({
   store: makeStore("rl:api:"),
-  windowMs: 15 * 60 * 1000,
+  windowMs: 60 * 1000,
   max: 200,
   standardHeaders: true,   // RateLimit-* headers (RFC 6585)
   legacyHeaders: false,     // disable X-RateLimit-* headers
@@ -155,18 +155,18 @@ export const apiLimiter = rateLimit({
 /**
  * Auth limiter — login / OAuth routes only.
  * Strictly IP-based (no JWT exists yet) to prevent brute-force attacks.
- * 20 requests / 15 minutes.
+ * 20 requests / 1 minute.
  */
 export const authLimiter = rateLimit({
   store: makeStore("rl:auth:"),
-  windowMs: 15 * 60 * 1000,
+  windowMs: 60 * 1000,
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: getAuthKey,
   handler: (req, res) => {
     const retryAfter = getRetryAfter(res);
-    const message = "Too many login attempts. Please try again after 15 minutes.";
+    const message = "Too many login attempts. Please try again after 60 seconds.";
 
     // GitHub OAuth: browser-initiated redirect — send back to the frontend
     if (req.path.includes("github")) {
@@ -187,16 +187,16 @@ export const authLimiter = rateLimit({
 /**
  * Write / mutation limiter — POST, PUT, PATCH, DELETE endpoints.
  * Counts per authenticated user or per IP for anonymous requests.
- * 50 requests / 15 minutes.
+ * 50 requests / 1 minute.
  */
 export const writeLimiter = rateLimit({
   store: makeStore("rl:write:"),
-  windowMs: 15 * 60 * 1000,
+  windowMs: 60 * 1000,
   max: 50,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: getUserKey,
-  skip: (req) => req.method === "GET",
+  skip: (req) => req.method === "GET" || req.path === "/api/auth/logout",
   handler: (_req, res) => {
     res.status(429).json({
       success: false,

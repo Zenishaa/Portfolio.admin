@@ -21,12 +21,12 @@ import { useNavigate } from "react-router-dom";
 
 import {
   deleteCertificate,
+  getCertificates,
   updateCertificate,
 } from "@features/certificates/services/certificate.service";
 import DashboardLayout from "@layouts/DashboardLayout";
 import AchievementCard from "@shared/components/cards/AchievementCard";
 import PageLoader from "@shared/components/ui/PageLoader";
-import api from "@shared/lib/api";
 
 type CertificateType =
   | "achievement"
@@ -97,17 +97,10 @@ function Certificates() {
   const fetchCertificates =
     async () => {
       try {
-        const response =
-          await api.get(
-            "/api/certificates"
-          );
+        const data = await getCertificates();
 
-        if (
-          response.data.success
-        ) {
-          setCertificates(
-            response.data.certificates
-          );
+        if (data.success) {
+          setCertificates(data.certificates);
         }
       } catch (error) {
         console.error(
@@ -119,11 +112,10 @@ function Certificates() {
           "Failed to load certificates"
         );
       } finally {
-        setCertificatesLoading(
-          false
-        );
+        setCertificatesLoading(false);
       }
     };
+
 
   useEffect(() => {
     void fetchCertificates();

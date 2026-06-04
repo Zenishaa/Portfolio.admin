@@ -28,7 +28,6 @@ import "./jobs/tokens/tokens.worker.js";
 import healthRoutes from "./features/health/health.routes.js";
 import authRoutes from "./features/auth/auth.routes.js";
 import userRoutes from "./features/users/user.routes.js";
-import heroRoutes from "./features/hero/hero.routes.js";
 import projectRoutes from "./features/projects/project.routes.js";
 import experienceRoutes from "./features/experience/experience.routes.js";
 import certificateRoutes from "./features/certificates/certificate.routes.js";
@@ -86,7 +85,6 @@ app.get("/", (req, res) => {
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/hero", heroRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/experience", experienceRoutes);
 app.use("/api/certificates", certificateRoutes);

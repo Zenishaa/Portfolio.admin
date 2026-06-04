@@ -12,7 +12,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function Navbar({
   sidebarOpen,
@@ -217,7 +217,8 @@ function Navbar({
 
         {/* Profile */}
 
-        <div
+        <Link
+          to="/profile"
           className="
             flex
             items-center
@@ -228,6 +229,9 @@ function Navbar({
             bg-[var(--bg-card)]
             px-3
             py-2
+            transition-all
+            hover:bg-[var(--bg-secondary)]
+            active:scale-[0.98]
           "
         >
           {user.avatar ? (
@@ -269,7 +273,7 @@ function Navbar({
               Administrator
             </p>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );
