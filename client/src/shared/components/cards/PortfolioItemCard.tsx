@@ -308,6 +308,9 @@ function PortfolioItemCard({
         <div
           className="
             mt-6
+            border-t
+            border-[var(--border-color)]
+            pt-5
             flex
             flex-wrap
             items-center
