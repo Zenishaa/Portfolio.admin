@@ -39,6 +39,18 @@ export const refreshAccessToken =
         });
       }
 
+      // Check if the token is expired in the DB (belt-and-suspenders beyond JWT verify)
+      if (storedToken.expires_at < new Date()) {
+        // Clean up the stale record immediately
+        await prisma.refreshToken.delete({
+          where: { id: storedToken.id },
+        });
+        return res.status(401).json({
+          success: false,
+          message: "Refresh token expired",
+        });
+      }
+
       try {
         const decoded = jwt.verify(
           refreshToken,
@@ -69,8 +81,8 @@ export const refreshAccessToken =
         // 4. Set new HttpOnly cookie
         res.cookie("refreshToken", newRefreshToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          secure: true, // Required for sameSite: "none"
+          sameSite: "none", // Allow cross-origin cookie (localhost -> render.com)
           maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 

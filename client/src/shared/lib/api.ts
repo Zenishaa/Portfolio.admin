@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 
 const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true, // Send HttpOnly refresh cookie on all requests
 });
 
 // For TypeScript to recognize the _retry flag on the config object

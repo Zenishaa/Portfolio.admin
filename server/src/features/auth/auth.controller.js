@@ -606,8 +606,8 @@ export const githubCallback =
       // Set HttpOnly cookie for the refresh token
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Secure in prod (requires HTTPS)
-        sameSite: "strict",
+        secure: true, // Required for sameSite: "none"
+        sameSite: "none", // Allow cross-origin cookie (localhost -> render.com)
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
@@ -638,16 +638,17 @@ export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
     if (refreshToken) {
-      // Delete from DB in the background (fire-and-forget)
-      prisma.refreshToken.deleteMany({
+      // Delete immediately — logout must invalidate the token right away.
+      // A queue is not used here because Redis downtime would leave the token alive in DB.
+      await prisma.refreshToken.deleteMany({
         where: { token: refreshToken },
-      }).catch((err) => console.error("Background DB deletion failed during logout:", err));
+      });
     }
     
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,
+      sameSite: "none",
     });
 
     return res.status(200).json({ success: true, message: "Logged out successfully" });

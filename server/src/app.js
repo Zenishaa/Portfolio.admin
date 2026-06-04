@@ -23,6 +23,7 @@ import tokenRoutes from "./features/tokens/token.routes.js";
 
 import "./jobs/analytics/analytics.worker.js";
 import "./jobs/logs/logs.worker.js";
+import "./jobs/tokens/tokens.worker.js";
 
 import healthRoutes from "./features/health/health.routes.js";
 import authRoutes from "./features/auth/auth.routes.js";
