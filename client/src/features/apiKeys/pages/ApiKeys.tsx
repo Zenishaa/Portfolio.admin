@@ -64,7 +64,7 @@ function ApiKeys() {
       return;
     }
     try {
-      let expires_at = null;
+      let expires_at: string | undefined = undefined;
       if (expiresInDays !== null) {
         const date = new Date();
         if (expiresInDays === -1) {
