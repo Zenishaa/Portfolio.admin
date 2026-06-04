@@ -213,6 +213,7 @@ function ApiKeys() {
         <div className="grid gap-4">
           {keys.map((key) => {
             const expired = key.expires_at ? new Date(key.expires_at) < new Date() : false;
+            const daysLeft = key.expires_at ? Math.ceil((new Date(key.expires_at).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
             
             return (
             <div
@@ -282,9 +283,12 @@ function ApiKeys() {
                     </div>
                   )}
                   {key.expires_at && (
-                    <div className="flex items-center gap-1.5 text-orange-500/90 font-medium" title="Expiration date">
+                    <div className={`flex items-center gap-1.5 font-medium ${expired ? "text-gray-500" : "text-orange-500/90"}`} title="Expiration date">
                       <Clock size={16} className="opacity-70" />
-                      <span>Expires {new Date(key.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      <span>
+                        {expired ? "Expired on" : "Expires"} {new Date(key.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {!expired && daysLeft !== null && ` (${daysLeft === 0 ? "today" : daysLeft === 1 ? "1 day left" : `${daysLeft} days left`})`}
+                      </span>
                     </div>
                   )}
                   <div className="flex items-center gap-1.5" title="Rate limit">
