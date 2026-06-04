@@ -8,6 +8,8 @@ export interface UserProfile {
   email: string;
   avatar: string | null;
   bio: string | null;
+  headline: string | null;
+
   users_links: Record<string, string> | null;
   skills: string[] | null;
   is_public: boolean;
