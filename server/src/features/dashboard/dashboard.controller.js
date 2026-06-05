@@ -110,7 +110,7 @@ export const getDashboardAnalytics = async (req, res) => {
       where.country = selectedCountry;
     }
 
-    const [dashboard, analytics, sessions, allSessions, projects, projectCount, researchCount, experienceCount, achievementCount, certificationCount, apiKeyCount] = await Promise.all([
+    const [dashboard, analytics, sessions, allSessions, projects, certificates, experienceCount, apiKeyCount] = await Promise.all([
       prisma.dashboard.findUnique({
         where: {
           user_id: userId,
@@ -154,45 +154,18 @@ export const getDashboardAnalytics = async (req, res) => {
           type: true,
         },
       }),
-      prisma.projects.count({
+      prisma.certificates.findMany({
         where: {
           user_id: userId,
-          type: {
-            contains: "project",
-            mode: "insensitive",
-          },
         },
-      }),
-      prisma.projects.count({
-        where: {
-          user_id: userId,
-          type: {
-            contains: "research",
-            mode: "insensitive",
-          },
+        select: {
+          id: true,
+          type: true,
         },
       }),
       prisma.experience.count({
         where: {
           user_id: userId,
-        },
-      }),
-      prisma.certificates.count({
-        where: {
-          user_id: userId,
-          type: {
-            equals: "achievement",
-            mode: "insensitive",
-          },
-        },
-      }),
-      prisma.certificates.count({
-        where: {
-          user_id: userId,
-          type: {
-            equals: "certificate",
-            mode: "insensitive",
-          },
         },
       }),
       prisma.aPI.count({
@@ -201,6 +174,11 @@ export const getDashboardAnalytics = async (req, res) => {
         },
       }),
     ]);
+
+    const projectCount = projects.filter(p => (p.type || "").toLowerCase().includes("project")).length;
+    const researchCount = projects.filter(p => (p.type || "").toLowerCase().includes("research")).length;
+    const achievementCount = certificates.filter(c => (c.type || "").toLowerCase().includes("achievement")).length;
+    const certificationCount = certificates.filter(c => (c.type || "").toLowerCase().includes("certificate")).length;
 
     const projectMap = new Map(
       projects.map((project) => [
