@@ -135,11 +135,9 @@ function Sidebar({
               label={item.label}
               path={item.path}
               active={
-                item.path === "/certificates"
-                  ? location.pathname.startsWith("/certificates")
-                  : item.path === "/api-keys"
-                    ? location.pathname.startsWith("/api-keys")
-                    : location.pathname === item.path
+                item.path === "/dashboard"
+                  ? location.pathname === "/dashboard"
+                  : location.pathname.startsWith(item.path)
               }
               sidebarOpen={sidebarOpen}
             />

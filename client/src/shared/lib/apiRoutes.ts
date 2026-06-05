@@ -29,6 +29,13 @@ export const API_ROUTES = {
     detail: (slug: string | number) => `/api/projects/${slug}`,
   },
 
+  experience: {
+    /** GET — List all experiences for the authenticated user, POST — Create a new experience */
+    list: "/api/experience",
+    /** GET | PUT | DELETE — Single experience by slug or id */
+    detail: (slug: string | number) => `/api/experience/${slug}`,
+  },
+
   certificates: {
     /** GET — List all certificates for the authenticated user */
     list: "/api/certificates",

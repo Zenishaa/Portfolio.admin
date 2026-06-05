@@ -28,6 +28,7 @@ import {
   Users,
   Zap,
   RefreshCw,
+  Briefcase,
 } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
@@ -800,6 +801,7 @@ export default function Dashboard() {
       <div className="mb-6 flex flex-wrap gap-2">
         {[
           { label: "Projects", path: "/projects", icon: <FolderKanban size={15} /> },
+          { label: "Experience", path: "/experience", icon: <Briefcase size={15} /> },
           { label: "Certificates", path: "/certificates", icon: <Zap size={15} /> },
           { label: "API Keys", path: "/api-keys", icon: <RefreshCw size={15} /> },
         ].map((item) => (

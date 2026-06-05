@@ -21,6 +21,13 @@ export const createExperience = async (req, res) => {
       mode,
     } = req.body;
 
+    if (!title || !slug || !company || !start_date) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, slug, company, and start date are required",
+      });
+    }
+
     const existingSlug =
       await prisma.experience.findFirst({
         where: {
@@ -58,25 +65,24 @@ export const createExperience = async (req, res) => {
         );
     }
 
+    const parsedIsCurrent = is_current === "true" || is_current === true;
+    const parsedLinks = links ? JSON.parse(links) : null;
+
     const experience =
       await prisma.experience.create({
         data: {
           user_id: userId,
           title,
           slug,
-          description,
-          start_date: start_date
-            ? new Date(start_date)
-            : null,
-          end_date: end_date
-            ? new Date(end_date)
-            : null,
-          is_current,
-          links,
+          description: description || null,
+          start_date: new Date(start_date),
+          end_date: parsedIsCurrent ? null : (end_date ? new Date(end_date) : null),
+          is_current: parsedIsCurrent,
+          links: parsedLinks,
           images: uploadedImages,
           company,
-          location,
-          mode,
+          location: location || null,
+          mode: mode || null,
         },
       });
     await redis.del(`portfolio:${userId}`);
@@ -232,19 +238,37 @@ export const updateExperience = async (req, res) => {
         );
     }
 
+    const parsedIsCurrent = req.body.is_current !== undefined
+      ? (req.body.is_current === "true" || req.body.is_current === true)
+      : existingExperience.is_current;
+
+    let parsedEndDate = existingExperience.end_date;
+    if (parsedIsCurrent) {
+      parsedEndDate = null;
+    } else if (req.body.end_date !== undefined) {
+      parsedEndDate = req.body.end_date ? new Date(req.body.end_date) : null;
+    }
+
     const updatedExperience =
       await prisma.experience.update({
         where: {
           id: existingExperience.id,
         },
         data: {
-          ...req.body,
+          title: req.body.title || existingExperience.title,
+          slug: req.body.slug || existingExperience.slug,
+          description: req.body.description !== undefined ? req.body.description : existingExperience.description,
+          company: req.body.company || existingExperience.company,
+          location: req.body.location !== undefined ? req.body.location : existingExperience.location,
+          mode: req.body.mode !== undefined ? req.body.mode : existingExperience.mode,
           start_date: req.body.start_date
             ? new Date(req.body.start_date)
             : existingExperience.start_date,
-          end_date: req.body.end_date
-            ? new Date(req.body.end_date)
-            : existingExperience.end_date,
+          end_date: parsedEndDate,
+          is_current: parsedIsCurrent,
+          links: req.body.links
+            ? JSON.parse(req.body.links)
+            : existingExperience.links,
           images: uploadedImages,
         },
       });

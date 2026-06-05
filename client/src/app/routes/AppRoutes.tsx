@@ -28,6 +28,12 @@ import CreateCertificate from "@features/certificates/pages/CreateCertificate";
 
 import EditCertificate from "@features/certificates/pages/EditCertificate";
 
+import Experiences from "@features/experience/pages/Experiences";
+
+import CreateExperience from "@features/experience/pages/CreateExperience";
+
+import EditExperience from "@features/experience/pages/EditExperience";
+
 import ApiKeys from "@features/apiKeys/pages/ApiKeys";
 
 import ProtectedRoute from "@app/routes/ProtectedRoute";
@@ -111,6 +117,33 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <EditProject />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/experience"
+          element={
+            <ProtectedRoute>
+              <Experiences />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/experience/create"
+          element={
+            <ProtectedRoute>
+              <CreateExperience />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/experience/:slug/edit"
+          element={
+            <ProtectedRoute>
+              <EditExperience />
             </ProtectedRoute>
           }
         />
