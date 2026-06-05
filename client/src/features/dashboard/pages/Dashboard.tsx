@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import {
+  Award,
   ArrowRight,
   Clock,
   Download,
@@ -22,13 +23,13 @@ import {
   FolderKanban,
   GitBranch,
   Mail,
+  BriefcaseBusiness,
   Monitor,
   Smartphone,
   Tablet,
   Users,
   Zap,
   RefreshCw,
-  Briefcase,
 } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
@@ -38,6 +39,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@layouts/DashboardLayout";
 
 type Range = "7d" | "30d" | "90d" | "1y";
+type DashboardView = "analytics" | "added";
 
 type DashboardSummary = {
   visits: number;
@@ -47,6 +49,15 @@ type DashboardSummary = {
   resumeDownloads: number;
   projectClicks: number;
   contactSubmissions: number;
+};
+
+type AddedCounts = {
+  totalProjectsAdded: number;
+  researchsAdded: number;
+  experienceAdded: number;
+  achievementsAdded: number;
+  certificationsAdded: number;
+  apiKeysAdded: number;
 };
 
 type TimelinePoint = {
@@ -101,6 +112,7 @@ type DashboardResponse = {
   selectedCountry: string;
   dashboard?: unknown;
   summary: DashboardSummary;
+  addedCounts?: AddedCounts;
   totalEvents: number;
   graphData: TimelinePoint[];
   countryBreakdown: CountryPoint[];
@@ -164,6 +176,42 @@ function formatActivityLabel(type: string) {
   };
 
   return map[type] || formatLabel(type);
+}
+
+function DashboardToggle({
+  value,
+  onChange,
+}: {
+  value: DashboardView;
+  onChange: (value: DashboardView) => void;
+}) {
+  return (
+    <div className="flex items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-1">
+      {[
+        { value: "analytics" as const, label: "Analytics" },
+        { value: "added" as const, label: "Library" },
+      ].map((item) => (
+        <button
+          key={item.value}
+          onClick={() => onChange(item.value)}
+          className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+            value === item.value
+              ? "text-white"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+          style={
+            value === item.value
+              ? {
+                  background: "linear-gradient(135deg, var(--grad-start), var(--grad-end))",
+                }
+              : undefined
+          }
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function getAuthToken() {
@@ -282,11 +330,52 @@ function ChartTooltip({
   );
 }
 
+function DashboardLoadingState() {
+  return (
+    <DashboardLayout>
+      <div className="space-y-6 animate-pulse">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <div className="h-3 w-44 rounded bg-[var(--bg-secondary)]" />
+            <div className="h-8 w-72 rounded bg-[var(--bg-secondary)]" />
+            <div className="h-4 w-[520px] max-w-full rounded bg-[var(--bg-secondary)]" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-10 w-20 rounded-xl bg-[var(--bg-secondary)]" />
+            <div className="h-10 w-28 rounded-xl bg-[var(--bg-secondary)]" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-28 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]"
+            />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="xl:col-span-2 h-[360px] rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]" />
+          <div className="h-[360px] rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]" />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="h-[360px] rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]" />
+          <div className="h-[360px] rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]" />
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [range, setRange] = useState<Range>("30d");
+  const [range, setRange] = useState<Range>("7d");
+  const [dashboardView, setDashboardView] = useState<DashboardView>("analytics");
   const [country, setCountry] = useState("ALL");
   const [reloadIndex, setReloadIndex] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -358,6 +447,92 @@ export default function Dashboard() {
   const topProjects = data?.topProjects || [];
   const recentActivity = data?.recentActivity || [];
   const availableCountries = data?.availableCountries || [];
+  const addedCounts = data?.addedCounts || {
+    totalProjectsAdded: 0,
+    researchsAdded: 0,
+    experienceAdded: 0,
+    achievementsAdded: 0,
+    certificationsAdded: 0,
+    apiKeysAdded: 0,
+  };
+
+  const analyticsCards = [
+    {
+      title: "Visits",
+      value: formatCount(safeNumber(summary.visits)),
+      icon: <Eye size={18} />,
+      accent: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+    },
+    {
+      title: "Unique Visitors",
+      value: formatCount(safeNumber(summary.uniqueVisitors)),
+      icon: <Users size={18} />,
+      accent: "linear-gradient(135deg,#3b82f6,#6366f1)",
+    },
+    {
+      title: "GitHub Clicks",
+      value: formatCount(safeNumber(summary.githubClicks)),
+      icon: <GitBranch size={18} />,
+      accent: "linear-gradient(135deg,#10b981,#059669)",
+    },
+    {
+      title: "Resume Downloads",
+      value: formatCount(safeNumber(summary.resumeDownloads)),
+      icon: <Download size={18} />,
+      accent: "linear-gradient(135deg,#06b6d4,#3b82f6)",
+    },
+    {
+      title: "Project Clicks",
+      value: formatCount(safeNumber(summary.projectClicks)),
+      icon: <FolderKanban size={18} />,
+      accent: "linear-gradient(135deg,#8b5cf6,#ec4899)",
+    },
+    {
+      title: "Contact Submissions",
+      value: formatCount(safeNumber(summary.contactSubmissions)),
+      icon: <Mail size={18} />,
+      accent: "linear-gradient(135deg,#10b981,#3b82f6)",
+    },
+  ];
+
+  const addedCards = [
+    {
+      title: "Total Projects Added",
+      value: formatCount(safeNumber(addedCounts.totalProjectsAdded)),
+      icon: <FolderKanban size={18} />,
+      accent: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+    },
+    {
+      title: "Researchs Added",
+      value: formatCount(safeNumber(addedCounts.researchsAdded)),
+      icon: <Eye size={18} />,
+      accent: "linear-gradient(135deg,#3b82f6,#6366f1)",
+    },
+    {
+      title: "Experience Added",
+      value: formatCount(safeNumber(addedCounts.experienceAdded)),
+      icon: <BriefcaseBusiness size={18} />,
+      accent: "linear-gradient(135deg,#10b981,#059669)",
+    },
+    {
+      title: "Achievements Added",
+      value: formatCount(safeNumber(addedCounts.achievementsAdded)),
+      icon: <Award size={18} />,
+      accent: "linear-gradient(135deg,#f59e0b,#ef4444)",
+    },
+    {
+      title: "Certifications Added",
+      value: formatCount(safeNumber(addedCounts.certificationsAdded)),
+      icon: <Zap size={18} />,
+      accent: "linear-gradient(135deg,#06b6d4,#3b82f6)",
+    },
+    {
+      title: "API Keys Added",
+      value: formatCount(safeNumber(addedCounts.apiKeysAdded)),
+      icon: <RefreshCw size={18} />,
+      accent: "linear-gradient(135deg,#8b5cf6,#ec4899)",
+    },
+  ];
 
   const deviceChartData = useMemo(
     () =>
@@ -368,6 +543,10 @@ export default function Dashboard() {
       })),
     [deviceBreakdown]
   );
+
+  if (loading && !data) {
+    return <DashboardLoadingState />;
+  }
 
   return (
     <DashboardLayout>
@@ -385,6 +564,11 @@ export default function Dashboard() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <DashboardToggle
+            value={dashboardView}
+            onChange={setDashboardView}
+          />
+
           <div className="flex items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-1">
             {RANGES.map((item) => (
               <button
@@ -422,6 +606,19 @@ export default function Dashboard() {
               </option>
             ))}
           </select>
+
+          <button
+            onClick={() => {
+              setReloadIndex((current) => current + 1);
+              setRefreshing(true);
+              window.setTimeout(() => setRefreshing(false), 700);
+            }}
+            className="flex items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2.5 text-[var(--text-primary)]"
+            style={{ boxShadow: "var(--shadow-sm)" }}
+            aria-label="Refresh dashboard"
+          >
+            <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
+          </button>
         </div>
       </div>
 
@@ -433,67 +630,16 @@ export default function Dashboard() {
         </div>
       ) : null}
 
-      <div className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <KpiCard
-          title="Visits"
-          value={loading ? "..." : formatCount(safeNumber(summary.visits))}
-          icon={<Eye size={18} />}
-          accent="linear-gradient(135deg,#6366f1,#8b5cf6)"
-        />
-        <KpiCard
-          title="Unique Visitors"
-          value={loading ? "..." : formatCount(safeNumber(summary.uniqueVisitors))}
-          icon={<Users size={18} />}
-          accent="linear-gradient(135deg,#3b82f6,#6366f1)"
-        />
-        <KpiCard
-          title="GitHub Clicks"
-          value={loading ? "..." : formatCount(safeNumber(summary.githubClicks))}
-          icon={<GitBranch size={18} />}
-          accent="linear-gradient(135deg,#10b981,#059669)"
-        />
-        <KpiCard
-          title="Live Demo Clicks"
-          value={loading ? "..." : formatCount(safeNumber(summary.liveDemoClicks))}
-          icon={<ExternalLink size={18} />}
-          accent="linear-gradient(135deg,#f59e0b,#ef4444)"
-        />
-        <KpiCard
-          title="Resume Downloads"
-          value={loading ? "..." : formatCount(safeNumber(summary.resumeDownloads))}
-          icon={<Download size={18} />}
-          accent="linear-gradient(135deg,#06b6d4,#3b82f6)"
-        />
-        <KpiCard
-          title="Project Clicks"
-          value={loading ? "..." : formatCount(safeNumber(summary.projectClicks))}
-          icon={<FolderKanban size={18} />}
-          accent="linear-gradient(135deg,#8b5cf6,#ec4899)"
-        />
-        <KpiCard
-          title="Contact Submissions"
-          value={loading ? "..." : formatCount(safeNumber(summary.contactSubmissions))}
-          icon={<Mail size={18} />}
-          accent="linear-gradient(135deg,#10b981,#3b82f6)"
-        />
-        <div
-          className="flex items-center justify-between rounded-2xl border border-dashed border-[var(--border-accent)] bg-[var(--accent-light)] p-5"
-        >
-          <div>
-            <p className="text-sm font-semibold" style={{ color: "var(--accent)" }}>
-              {loading ? "Refreshing" : "Live"}
-            </p>
-            <p className="text-xs text-[var(--text-muted)]">Dashboard data updates on demand</p>
-          </div>
-          <button
-            onClick={() => {
-              setReloadIndex((current) => current + 1);
-            }}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[var(--accent)]"
-          >
-            <RefreshCw size={16} />
-          </button>
-        </div>
+      <div className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-3">
+        {(dashboardView === "analytics" ? analyticsCards : addedCards).map((card) => (
+          <KpiCard
+            key={card.title}
+            title={card.title}
+            value={loading ? "..." : card.value}
+            icon={card.icon}
+            accent={card.accent}
+          />
+        ))}
       </div>
 
       <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -707,7 +853,7 @@ export default function Dashboard() {
             </button>
           }
         >
-          <div className="space-y-3">
+          <div className="max-h-[360px] space-y-3 overflow-y-auto pr-2">
             {topProjects.length ? (
               topProjects.map((project, index) => (
                 <div
@@ -750,7 +896,7 @@ export default function Dashboard() {
           title="Recent activity"
           subtitle="Latest tracked portfolio events"
         >
-          <div className="space-y-2">
+          <div className="max-h-[360px] space-y-2 overflow-y-auto pr-2">
             {recentActivity.length ? (
               recentActivity.map((item) => (
                 <div
@@ -801,7 +947,6 @@ export default function Dashboard() {
       <div className="mb-6 flex flex-wrap gap-2">
         {[
           { label: "Projects", path: "/projects", icon: <FolderKanban size={15} /> },
-          { label: "Experience", path: "/experience", icon: <Briefcase size={15} /> },
           { label: "Certificates", path: "/certificates", icon: <Zap size={15} /> },
           { label: "API Keys", path: "/api-keys", icon: <RefreshCw size={15} /> },
         ].map((item) => (
