@@ -139,13 +139,23 @@ function Sidebar({
                     : location.pathname === item.path
               }
               sidebarOpen={sidebarOpen}
+              onClick={() => {
+                if (window.innerWidth < 1024) {
+                  setSidebarOpen(false);
+                }
+              }}
             />
           ))}
         </nav>
 
         <div className="border-t border-[var(--border-color)] p-3 space-y-2">
           <button
-            onClick={() => navigate("/logout")}
+            onClick={() => {
+              navigate("/logout");
+              if (window.innerWidth < 1024) {
+                setSidebarOpen(false);
+              }
+            }}
             data-tooltip={!sidebarOpen ? "Logout" : undefined}
             className={`
               flex w-full items-center gap-3 rounded-xl px-3 py-2.5

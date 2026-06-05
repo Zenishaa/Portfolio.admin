@@ -7,18 +7,23 @@ function SidebarItem({
   active,
   sidebarOpen,
   path,
+  onClick,
 }: {
   icon:        ReactNode;
   label:       string;
   active?:     boolean;
   sidebarOpen: boolean;
   path:        string;
+  onClick?:    () => void;
 }) {
   const navigate = useNavigate();
 
   return (
     <button
-      onClick={() => navigate(path)}
+      onClick={() => {
+        navigate(path);
+        onClick?.();
+      }}
       data-tooltip={!sidebarOpen ? label : undefined}
       className={`
         relative flex w-full items-center gap-3
