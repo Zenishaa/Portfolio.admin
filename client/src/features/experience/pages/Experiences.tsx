@@ -39,7 +39,6 @@ interface Experience {
 }
 
 type ModeFilter = "all" | "remote" | "on-site" | "hybrid";
-type StatusFilter = "all" | "current" | "past";
 
 function Experiences() {
   const navigate = useNavigate();
@@ -59,7 +58,6 @@ function Experiences() {
       FILTER STATE
   ========================= */
   const [activeModeFilter, setActiveModeFilter] = useState<ModeFilter>("all");
-  const [activeStatusFilter, setActiveStatusFilter] = useState<StatusFilter>("all");
   const [expToDelete, setExpToDelete] = useState<Experience | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -143,20 +141,9 @@ function Experiences() {
           return false;
         }
       }
-
-      // Status filter
-      if (activeStatusFilter !== "all") {
-        if (activeStatusFilter === "current" && !exp.is_current) {
-          return false;
-        }
-        if (activeStatusFilter === "past" && exp.is_current) {
-          return false;
-        }
-      }
-
       return true;
     });
-  }, [experiences, activeModeFilter, activeStatusFilter]);
+  }, [experiences, activeModeFilter]);
 
   if (loading) {
     return <PageLoader />;
@@ -228,33 +215,6 @@ function Experiences() {
                 `}
               >
                 {filter === "all" ? "All Modes" : filter.charAt(0).toUpperCase() + filter.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {/* Status Filters */}
-          <div className="flex items-center gap-2">
-            {(["all", "current", "past"] as const).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveStatusFilter(filter)}
-                className={`
-                  rounded-2xl
-                  border
-                  px-4
-                  py-2
-                  text-xs
-                  font-medium
-                  transition-all
-                  duration-300
-                  ${
-                    activeStatusFilter === filter
-                      ? "border-[var(--button-primary)] bg-[var(--button-primary)]/10 text-[var(--button-primary)]"
-                      : "border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)]"
-                  }
-                `}
-              >
-                {filter === "all" ? "All Time" : filter.charAt(0).toUpperCase() + filter.slice(1)}
               </button>
             ))}
           </div>
@@ -388,10 +348,9 @@ function Experiences() {
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-3">
-                        <h2 className="text-xl font-semibold">{exp.title}</h2>
-                        <span className="text-sm font-medium text-[var(--text-muted)]">
-                          at {exp.company}
-                        </span>
+                        <h2 className="text-xl font-semibold">
+                          {exp.company} - <span className="italic font-normal">{exp.title}</span>
+                        </h2>
 
                         {exp.is_current && (
                           <div className="rounded-full bg-green-100 text-green-700 px-3 py-1 text-xs font-medium">

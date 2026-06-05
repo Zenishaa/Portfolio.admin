@@ -65,10 +65,6 @@ function ExperienceCard({
     }
   };
 
-  const getCompanyAvatarText = (name: string) => {
-    return name.slice(0, 2).toUpperCase();
-  };
-
   // Get the first image if available
   const mainImage = images && images.length > 0 ? images[0] : null;
 
@@ -130,46 +126,6 @@ function ExperienceCard({
           </div>
         )}
 
-        {/* Company Badge Overlay */}
-        <div
-          className="
-            absolute
-            bottom-4
-            left-6
-            flex
-            items-center
-            gap-3
-            bg-[var(--bg-card)]/80
-            backdrop-blur-md
-            border
-            border-[var(--border-color)]
-            rounded-2xl
-            px-4
-            py-2
-            shadow-md
-          "
-        >
-          <div
-            className="
-              flex
-              h-8
-              w-8
-              items-center
-              justify-center
-              rounded-lg
-              bg-[var(--button-primary)]
-              text-xs
-              font-bold
-              text-white
-              dark:text-black
-            "
-          >
-            {getCompanyAvatarText(company)}
-          </div>
-          <span className="text-sm font-semibold truncate max-w-[150px]">
-            {company}
-          </span>
-        </div>
 
         {/* Current / Active status indicator */}
         {is_current && (
@@ -200,7 +156,9 @@ function ExperienceCard({
 
       {/* Main Content */}
       <div className="p-6 flex flex-col flex-1">
-        <h3 className="text-xl font-bold leading-snug">{title}</h3>
+        <h3 className="text-xl font-bold leading-snug">
+          {company} - <span className="italic font-normal">{title}</span>
+        </h3>
 
         {/* Location & Mode Row */}
         <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-[var(--text-muted)] font-medium">
