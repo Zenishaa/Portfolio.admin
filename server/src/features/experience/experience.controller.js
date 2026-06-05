@@ -65,15 +65,11 @@ export const createExperience = async (req, res) => {
           title,
           slug,
           description,
-          start_date: start_date
-            ? new Date(start_date)
-            : null,
-          end_date: end_date
-            ? new Date(end_date)
-            : null,
-          is_current,
-          links,
-          images: uploadedImages,
+          start_date: start_date ? new Date(start_date) : null,
+          end_date: end_date ? new Date(end_date) : null,
+          is_current: is_current === "true" || is_current === true,
+          links: links ? JSON.parse(links) : null,
+          images: uploadedImages.length > 0 ? uploadedImages : null,
           company,
           location,
           mode,
@@ -245,7 +241,13 @@ export const updateExperience = async (req, res) => {
           end_date: req.body.end_date
             ? new Date(req.body.end_date)
             : existingExperience.end_date,
-          images: uploadedImages,
+          is_current: req.body.is_current !== undefined 
+            ? req.body.is_current === "true" || req.body.is_current === true
+            : existingExperience.is_current,
+          links: req.body.links
+            ? JSON.parse(req.body.links)
+            : existingExperience.links,
+          images: uploadedImages.length > 0 ? uploadedImages : existingExperience.images,
         },
       });
     await redis.del(`portfolio:${userId}`);
