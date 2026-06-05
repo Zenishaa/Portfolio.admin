@@ -38,6 +38,7 @@ import { useNavigate } from "react-router-dom";
 
 import DashboardLayout from "@layouts/DashboardLayout";
 import DashboardLoadingState from "@shared/components/ui/DashboardLoadingState";
+import { toast } from "react-hot-toast";
 
 type Range = "7d" | "30d" | "90d" | "1y";
 type DashboardView = "analytics" | "added";
@@ -340,7 +341,7 @@ export default function Dashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
 
   useEffect(() => {
     let alive = true;
@@ -348,7 +349,6 @@ export default function Dashboard() {
     async function loadDashboard() {
       try {
         setLoading(true);
-        setError(null);
 
         const apiUrl = import.meta.env.VITE_API_URL || "";
         const token = getAuthToken();
@@ -376,7 +376,8 @@ export default function Dashboard() {
         }
       } catch (err) {
         if (alive) {
-          setError(err instanceof Error ? err.message : "Unable to load dashboard data.");
+          const errorMessage = err instanceof Error ? err.message : "Unable to load dashboard data.";
+          toast.error(errorMessage);
         }
       } finally {
         if (alive) {
@@ -584,13 +585,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {error ? (
-        <div
-          className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-        >
-          {error}
-        </div>
-      ) : null}
 
       <div className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-3">
         {(dashboardView === "analytics" ? analyticsCards : addedCards).map((card) => (
