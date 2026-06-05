@@ -19,7 +19,6 @@ function DashboardLayout({
       {/* Sidebar */}
       <Sidebar
         sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
       />
 
       {/* Main content */}
